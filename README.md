@@ -1,1 +1,0 @@
-# Virtual-3d-Model-of-Kalasag
