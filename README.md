@@ -4,7 +4,7 @@ A self-contained interactive model of the survivor distress node, a mobile LoRa 
 
 The relay uses one elevated 5.8 dBi fiberglass antenna, a 3 m low-loss N-to-SMA coax feedline, an ESP32-WROOM-32, SX1262, DS3231 RTC, LM2596 converter and a 12 V 7 Ah field battery. The battery and electronics occupy a low-mounted IP66 weatherproof junction-box concept with sealed cable entries, a mounting plate, fused input and mast clamps. The tower has three folding legs, support braces, rubber feet, telescoping sections and locking collars. There are no relay user-interface controls specified.
 
-The console representation includes ESP32-WROOM-32, SX1262, a 3 dBi magnetic-mount whip, USB cable and small case, 5 V active buzzer and DS3231. The existing dashboard simulates acknowledgement and response dispatch:
+The console representation includes ESP32-WROOM-32, SX1262, a 3 dBi magnetic-mount whip, USB cable and small case, 5 V active buzzer and DS3231. Hardware opens as a selectable 3D assembly with a removable case lid, mounting bosses, board standoffs, headers, RF/USB connectors, representative buzzer driver and wiring that follows exploded parts. Switch between **Hardware / Dashboard**; the dashboard explicitly labels all health and incident data as simulated. It supports automatic or operator acknowledgement, response dispatch and reset:
 
 **Survivor node → Mobile relay tower → Console transceiver → Offline console**
 
@@ -21,9 +21,9 @@ The console representation includes ESP32-WROOM-32, SX1262, a 3 dBi magnetic-mou
 
 Open `index.html` directly in a desktop browser. The embedded Three.js library needs no build step or network connection. Do not use GitHub Pages as the test environment.
 
-The Relay tab opens centered on the field enclosure. Use **Full tower** to frame the deployed mast and **Focus enclosure** to return. Relay wiring follows the module terminals in exploded mode.
+The Relay tab opens centered on the field enclosure. Select **Enclosure**, **Antenna** or **Full tower** for smooth framing transitions. Orbit and zoom remain centered on the selected focus. Pan vertically with Shift-drag, right-drag, Shift-scroll, the **Mast height** slider, or two-finger drag; pinch to zoom on touch devices. Heights use the conceptual 7 display units per metre scale, including the antenna above the 4 m mast. Reset restores enclosure focus, default orbit and framing, and stops auto-rotation. Switching tabs preserves camera focus, orbit, zoom and pan; resizing preserves relative zoom. Relay and console wiring follow their module terminals in exploded mode.
 
-Check all three tabs, the initially centered enclosure and full-tower toggle, orbit and zoom, all ten selectable relay parts, labels, X-ray and exploded modes. Select each console hardware item, send a test alert, wait for acknowledgement, dispatch a response, and reset. Inspect the distress-node DS3231 RTC and its four wires (VCC, GND, SDA, SCL). Repeat at a mobile viewport and check the browser console for JavaScript errors.
+Check all three tabs, each relay focus preset, vertical panning, orbit and zoom, all ten selectable relay parts, labels, X-ray and exploded modes. Inspect all seven console hardware components. In Dashboard, send a test alert, inspect Spatial ID, location, severity and local timestamps, acknowledge or wait for automatic acknowledgement, dispatch a response, and reset. Reset cancels pending alert timers; automatic acknowledgement cannot regress an operator dispatch. Inspect the distress-node DS3231 RTC and its four wires (VCC, GND, SDA, SCL). Repeat at a mobile viewport and check the browser console for JavaScript errors.
 
 If your browser restricts local files, serve this directory locally:
 
@@ -33,11 +33,22 @@ python3 -m http.server 8000 --bind 127.0.0.1
 
 Then open `http://127.0.0.1:8000/index.html#relay`. Keep testing local; review the result before committing or pushing. Do not push to `main` without approval.
 
+## Repeatable browser verification
+
+With the local server running and Playwright available to Node, run:
+
+```sh
+MODEL_URL=http://127.0.0.1:8000/index.html node tests/browser-check.cjs
+```
+
+The checks use Chromium with WebGL software rendering, desktop and mobile viewports, real mouse/touch input, hardware selection, X-ray, exploded-wire endpoints, incident acknowledgement/dispatch/reset, tab persistence and browser error capture. Set `ARTIFACT_DIR` to a local directory to save inspection screenshots. Playwright is a test dependency only; the viewer itself remains offline and self-contained.
+
 ## Sources
 
 The hardware follows the KALASAG Proposal, §6, and the [component sheet](https://docs.google.com/spreadsheets/d/1QLaJ-uK42XSZoBPESpl_FkiHE4a3wLdfT5JuzkQpVLM/edit?gid=0). The supplied mast image is a tripod-form reference only; its lights and crossbar are excluded.
 
 ## Repository layout
 
-- `index.html` — embedded 3D viewer, relay tower, console hardware illustration and dashboard simulation
+- `index.html` — embedded 3D viewer, relay tower, console hardware assembly and dashboard simulation
 - `kalasag_distress_node_3d.html` — compatibility redirect for the original URL
+- `tests/browser-check.cjs` — local Chromium interaction and rendering regression checks

@@ -59,6 +59,24 @@ aside{background:var(--panel);border-left:1px solid var(--line);display:flex;fle
 .event-log{margin:12px 0 0;padding:0;list-style:none}.event-log li{border-top:1px solid var(--line);padding:8px 0;font-size:12px;color:var(--mut)}
 @media(max-width:760px){#node-tabs{height:44px;padding:5px 7px}#node-tabs button{padding:7px 10px}.console-grid{grid-template-columns:1fr 1fr}.flow{grid-template-columns:1fr 1fr}#console-view{padding:60px 12px 16px}.flow-card{grid-column:1/-1}}
 .transceiver{display:block;width:100%;max-height:300px;margin:14px auto}.transceiver text{font:12px system-ui;text-anchor:middle;fill:#243742}.transceiver text[fill="white"]{fill:white}.transceiver .selected{filter:drop-shadow(0 0 4px #e8590c)}.system-route{margin-top:12px!important;font-weight:600}@media(max-width:760px){.console-grid{grid-template-columns:1fr}.ttl div{max-width:100%;font-size:11px}}
+
+#inspection-nav{position:absolute;top:78px;left:16px;right:16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;pointer-events:none}
+#inspection-nav>*{pointer-events:auto;background:var(--panel)}
+#inspection-nav [hidden]{display:none}
+#pan-control{font-size:12px;padding:5px 9px;border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;gap:7px}
+#mast-height{width:105px;accent-color:var(--acc)}
+#nav-hint{font-size:11px;color:var(--mut);background:none;pointer-events:none}
+#console-view{padding-top:128px}
+.ttl,#inspection-nav{z-index:2}
+.incident-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
+.incident-meta dt{font-size:11px;color:var(--mut)}.incident-meta dd{margin:3px 0 0;font-weight:600;font-size:13px;overflow-wrap:anywhere}
+.simulation{color:var(--acc);font-size:12px;font-weight:700;margin-bottom:12px}
+.console-actions button:disabled{opacity:.45;cursor:default}
+@media(max-width:760px){#inspection-nav{top:74px;left:10px;right:10px;gap:5px}#nav-hint{flex-basis:100%}#mast-height{width:80px}.incident-meta{grid-template-columns:1fr 1fr}#console-view{padding-top:125px}#ctl{gap:5px}.sl input{width:70px}#ctl .seg button{font-size:12px}}
+#app.dashboard-mode{grid-template-columns:1fr}#app.dashboard-mode aside{display:none}
+#stage.console-mode .ttl{left:0;top:0;max-width:none;width:100%;height:116px;box-sizing:border-box;padding:14px 16px;background:var(--bg)}
+#stage.console-mode #console-view{top:116px;padding:12px 24px 24px}
+@media(max-width:760px){#app.dashboard-mode{grid-template-rows:1fr}#stage.console-mode #console-view{padding:12px}}
 </style>
 </head>
 <body>
@@ -72,25 +90,22 @@ aside{background:var(--panel);border-left:1px solid var(--line);display:flex;fle
   <canvas id="cv"></canvas>
   <div id="tags" class="off"></div>
   <div class="ttl"><b id="node-title">KALASAG Survivor Distress Node</b><div id="node-subtitle">Wall-mounted installation · drag to inspect · scroll to zoom</div><div id="cap"><span id="dot"></span><span id="capt"></span></div></div>
+  <div id="inspection-nav">
+   <div class="seg" id="relay-focus" hidden aria-label="Relay camera focus"><button data-focus="box" class="on" aria-pressed="true">Enclosure</button><button data-focus="antenna" aria-pressed="false">Antenna</button><button data-focus="tower" aria-pressed="false">Full tower</button></div>
+   <label id="pan-control" hidden>Mast height <input id="mast-height" type="range" min="0" max="4.9" step="0.01" value="0.71" aria-label="Camera height in conceptual metres"><output id="height-output">0.7 m</output></label>
+   <div class="seg" id="console-tabs" hidden aria-label="Console view"><button data-console-view="hardware" class="on" aria-pressed="true">Hardware</button><button data-console-view="dashboard" aria-pressed="false">Dashboard</button></div>
+   <span id="nav-hint" hidden>Drag: orbit · Shift / right-drag: height · Two fingers: pan / zoom</span>
+  </div>
   <section id="console-view" aria-label="BDRRMC console dashboard">
    <div class="console-grid">
-    <article class="console-card"><h3>Distress nodes</h3><div class="metric ok">24 / 24</div><p>Reporting within the expected window</p></article>
-    <article class="console-card"><h3>Mobile relay tower</h3><div class="metric ok" id="relay-health">Online</div><p>Survivor-node LoRa link · Console-transceiver LoRa link</p></article>
+    <article class="console-card"><h3>Simulated distress nodes</h3><div class="metric ok">24 / 24</div><p>Reporting within the expected window</p></article>
+    <article class="console-card"><h3>Simulated mobile relay tower</h3><div class="metric ok" id="relay-health">Online</div><p>Survivor-node LoRa link · Console-transceiver LoRa link</p></article>
     <article class="console-card"><h3>Open incidents</h3><div class="metric alert" id="incident-count">0</div><p>Awaiting operator action</p></article>
-    <article class="console-card flow-card"><h3>USB LoRa console transceiver</h3><p>Conceptual physical arrangement · select a part in the sidebar · 915–918 MHz</p>
-     <svg class="transceiver" viewBox="0 0 680 235" role="img" aria-label="Console transceiver with ESP32-WROOM-32, SX1262, RTC and buzzer inside a small USB case, connected to a magnetic-mount whip and offline laptop">
-      <g fill="none" stroke="#8095a5" stroke-width="3"><path d="M400 150 C460 150 420 100 495 100"/><path d="M300 50 C390 10 440 50 450 185"/></g>
-      <g data-console-part="3"><rect x="35" y="45" width="365" height="155" rx="14" fill="#d9e1e8" stroke="#718995" stroke-width="3"/><text x="210" y="222">Small case · USB cable / laptop power</text></g>
-      <g data-console-part="0"><rect x="55" y="65" width="100" height="115" rx="6" fill="#285969"/><rect x="70" y="88" width="70" height="45" fill="#c7d1d4"/><text x="105" y="151" fill="white">ESP32</text><text x="105" y="167" fill="white">WROOM-32</text></g>
-      <g data-console-part="1"><rect x="175" y="65" width="95" height="65" rx="5" fill="#387356"/><rect x="183" y="72" width="79" height="45" fill="#c7d1d4"/><text x="222" y="101">SX1262</text></g>
-      <g data-console-part="5"><rect x="175" y="145" width="95" height="35" rx="5" fill="#32768c"/><text x="222" y="168" fill="white">DS3231 RTC</text></g>
-      <g data-console-part="4"><circle cx="332" cy="120" r="30" fill="#28343d"/><circle cx="332" cy="120" r="7" fill="#131a20"/><text x="332" y="171">5 V buzzer</text></g>
-      <g data-console-part="2"><path d="M450 185 L450 38" stroke="#28343d" stroke-width="5"/><ellipse cx="450" cy="190" rx="28" ry="8" fill="#28343d"/><text x="450" y="20">3 dBi whip</text><text x="450" y="222">Magnetic base</text></g>
-      <rect x="500" y="60" width="150" height="100" rx="7" fill="#28343d"/><rect x="510" y="70" width="130" height="78" fill="#aad6cf"/><path d="M487 168 H663 L674 181 H477 Z" fill="#849aa9"/><text x="575" y="107">Offline console</text><text x="575" y="127">USB serial link</text>
-     </svg>
+    <article class="console-card flow-card"><div class="simulation">SIMULATION · Generated test data · No live devices connected</div><h3 id="incident-title">No active incident</h3>
+     <dl class="incident-meta"><div><dt>Spatial ID</dt><dd id="incident-spatial">—</dd></div><div><dt>Location</dt><dd id="incident-location">—</dd></div><div><dt>Severity</dt><dd id="incident-severity">—</dd></div><div><dt>Received (local time)</dt><dd id="incident-received">—</dd></div><div><dt>Acknowledgement</dt><dd id="incident-ack">—</dd></div><div><dt>Dispatch state</dt><dd id="incident-dispatch">—</dd></div></dl>
      <p class="system-route">Survivor node → Mobile relay tower → Console transceiver → Offline console</p>
     </article>
-    <article class="console-card flow-card"><h3>Alert lifecycle</h3><p>Conceptual end-to-end acknowledgement flow.</p><div class="flow" id="flow"><div class="flow-step">1 · Distress sent</div><div class="flow-step">2 · Relay received</div><div class="flow-step">3 · Console acknowledged</div><div class="flow-step">4 · Help dispatched</div></div><div class="console-actions"><button id="test-alert">Send test alert</button><button id="dispatch-help" class="secondary" disabled>Dispatch response</button><button id="reset-flow" class="secondary">Reset</button></div><ul class="event-log" id="event-log"><li>No active alert.</li></ul></article>
+    <article class="console-card flow-card"><h3>Alert lifecycle</h3><p>Simulated end-to-end acknowledgement flow. Test alerts are automatically acknowledged; operators can acknowledge after relay receipt.</p><div class="flow" id="flow"><div class="flow-step">1 · Distress sent</div><div class="flow-step">2 · Relay received</div><div class="flow-step">3 · Console acknowledged</div><div class="flow-step">4 · Help dispatched</div></div><div class="console-actions"><button id="test-alert">Send test alert</button><button id="ack-alert" class="secondary" disabled>Acknowledge</button><button id="dispatch-help" class="secondary" disabled>Dispatch response</button><button id="reset-flow" class="secondary">Reset</button></div><ul class="event-log" id="event-log"><li>No active alert.</li></ul></article>
    </div>
   </section>
   <div id="ctl">
@@ -98,7 +113,7 @@ aside{background:var(--panel);border-left:1px solid var(--line);display:flex;fle
    <label class="sl">Separation <input id="sl" type="range" min="0" max="100" value="0"></label>
    <label class="chk"><input id="lb" type="checkbox">Labels</label>
    <label class="chk"><input id="ar" type="checkbox">Auto-rotate</label>
-   <button class="ghost" id="lid">Open button cover</button><button class="ghost" id="guard">Lift TRAPPED guard</button><button class="ghost" id="rv">Reset view</button><button type="button" class="ghost" id="relay-frame" hidden>Full tower</button>
+   <button class="ghost" id="lid">Open button cover</button><button class="ghost" id="guard">Lift TRAPPED guard</button><button class="ghost" id="rv">Reset view</button>
   </div>
  </div>
  <aside><div id="info"></div><ul id="list"></ul><div class="setup-tools"><button class="ghost" id="save-setup">Save setup</button><label class="ghost">Load setup<input id="load-setup" type="file" accept=".json" hidden></label></div></aside>
@@ -342,7 +357,7 @@ function relayBoard(name,w,h,x,y,color,spec,ex,ey,decorate){const g=board(w,h,co
  for(const sx of [-1,1])for(const sy of [-1,1])g.add(cylZ(.08,.22,metal(),x+sx*(w/2-.15),y+sy*(h/2-.15),1.28));
  decorate(g,x,y);mov(g,3,ey,ex);const p=relayPart(name,'Electronics',spec,g,[x,y,1.95]);return p;
 }
-function relayHeader(g,x,y,n,dy=.2){pads(g,x,y,1.54,n,dy);for(let i=0;i<n;i++)g.add(box(.12,.13,.12,blk(),x,y+i*dy,1.65),box(.04,.04,.28,gold(),x,y+i*dy,1.82))}
+function relayHeader(g,x,y,n,dy=.2,z=1.54){pads(g,x,y,z,n,dy);for(let i=0;i<n;i++)g.add(box(.12,.13,.12,blk(),x,y+i*dy,z+.11),box(.04,.04,.28,gold(),x,y+i*dy,z+.28))}
 const relayController=relayBoard('ESP32-WROOM-32',1.7,2.1,-1,-6.55,0x224653,'Relay controller: automatic alert forwarding, duplicate suppression and batches of up to eight alerts, prioritizing TRAPPED. Survivor-node LoRa link → console-transceiver LoRa link. Pin labels and routes remain representative.',-1,1,(g,x,y)=>{
  g.add(box(.85,.8,.19,metal(),x,y+.18,1.64),text('ESP32',.65,.16,x,y+.2,1.75,'#3c4650',84),box(.85,.35,.08,mat(0x192c32),x,y+.76,1.57),box(.62,.26,.22,metal(),x,y-.86,1.66),box(.43,.07,.1,blk(),x,y-.99,1.77));
  for(const sx of [-.68,.68])relayHeader(g,x+sx,y-.65,8,.18);
@@ -386,6 +401,51 @@ relayLead(relayController,[-1.68,-6.84,1.8],relayRtc,[1.164,-8.818,1.8],0x8b73be
 relayLead(relayController,[-1.68,-7.02,1.8],relayRtc,[1.516,-8.818,1.8],0x4c8dbe);
 relayLead(relayRadio,[1.45,-5.71,1.8],relayBoxPart,[1,-5.15,1.5],0x302b23);
 function updateRelayLeads(){if(Math.abs(sep-lastRelayWireSep)<.0005)return;relayRoot.updateMatrixWorld(true);relayHarness.updateMatrixWorld(true);for(const l of relayLeads){const a=relayHarness.worldToLocal(l.a.obj.localToWorld(new T.Vector3(...l.ap))),b=relayHarness.worldToLocal(l.b.obj.localToWorld(new T.Vector3(...l.bp))),v=b.clone().sub(a),p1=a.clone().addScaledVector(v,.3),p2=a.clone().addScaledVector(v,.7);p1.y-=l.sag;p2.y-=l.sag;p1.z+=.24;p2.z+=.24;const geo=new T.TubeGeometry(new T.CatmullRomCurve3([a,p1,p2,b]),24,.022,8);l.mesh.geometry.dispose();l.mesh.geometry=geo;}lastRelayWireSep=sep;}
+
+/* USB console transceiver: representative footprints and wiring, not a circuit design. */
+const consoleRoot=new T.Group(),consoleParts=[],consolePick=[],consoleLeads=[],consoleHarness=new T.Group();
+scene.add(consoleRoot);consoleRoot.visible=false;consoleRoot.add(consoleHarness);
+function consolePart(name,cat,spec,obj,anchor,shell=false){consoleRoot.add(obj);const p={id:consoleParts.length+1,name,cat,spec,obj,anchor,shell};consoleParts.push(p);obj.traverse(o=>{if(o.isMesh){o.userData.part=p;o.castShadow=true;o.receiveShadow=true;consolePick.push(o)}});p.source={status:'Concept model',kind:'custom',detail:'Representative geometry and wiring. Confirm supplier footprints, mounting clearance and electrical interfaces before fabrication.',links:[]};return p}
+const consoleCase=new T.Group(),consoleLid=new T.Group();
+shellMesh(box(9,7,.2,mat(0x8797a0),-1,0,0),consoleCase);
+for(const x of [-5.4,3.4])shellMesh(box(.2,7,1.8,mat(0x354b58),x,0,.9),consoleCase);
+for(const y of [-3.4,3.4])shellMesh(box(9,.2,1.8,mat(0x354b58),-1,y,.9),consoleCase);
+shellMesh(ext(rr(9,7,.3),.18,1.83,mat(0x354b58)),consoleLid);consoleLid.children[0].position.x=-1;
+consoleLid.add(text('KALASAG · USB LoRa',6,.45,-1,.6,2.06),text('915–918 MHz · CONSOLE',5,.26,-1,-.05,2.06,'#afc5cc',65));
+consoleCase.add(cylZ(.23,.3,gold(),3.4,1.7,1.05),ring(.24,.035,metal(),3.4,1.7,1.22),box(.9,.18,.6,blk(),-3,-3.4,.7));
+for(const x of [-5,3])for(const y of [-3,3]){consoleCase.add(cylZ(.14,1.3,metal(),x,y,.7));consoleLid.add(screw(x,y,2.08))}
+for(let i=0;i<7;i++)consoleLid.add(box(.55,.065,.02,blk(),1.5,-1.5+i*.15,2.04));
+mov(consoleLid,6,3,-10);consoleCase.add(consoleLid);
+const cpCase=consolePart('Small transceiver case','Outer shell','Conceptual compact enclosure with removable lid, screw bosses, buzzer vents and cable strain reliefs. Dimensions, magnetic mounting surface and thermal clearance need supplier confirmation.',consoleCase,[-4,-2,2.1],true);
+function consoleBoard(name,w,h,x,y,color,spec,ex,ey,decorate){const g=board(w,h,color,x,y,.55);for(const dx of [-1,1])for(const dy of [-1,1])g.add(cylZ(.09,.4,metal(),x+dx*(w/2-.15),y+dy*(h/2-.15),.25),screw(x+dx*(w/2-.15),y+dy*(h/2-.15),.65,.07));decorate(g,x,y);mov(g,3,ey,ex);return consolePart(name,'Electronics',spec,g,[x,y,1.1])}
+const cpEsp=consoleBoard('ESP32-WROOM-32',2.4,3.8,-3,0,0x224653,'USB serial controller for relayed alerts. Representative WROOM shield, PCB antenna, USB bridge, reset controls and headers. USB 5 V supplies the controller board; onboard 3.3 V regulation supplies radio and RTC.',-1.5,.8,(g,x,y)=>{
+ g.add(box(1.4,1.6,.2,metal(),x,y+.4,.75),text('ESP32',1.2,.22,x,y+.4,.86,'#253d46',90),box(1.4,.6,.08,blk(),x,y+1.45,.64),box(.8,.45,.27,metal(),x,y-1.9,.71),box(.57,.15,.14,blk(),x,y-2.05,.73));
+ ic(g,x,y-1,.7,.45,.5,16);for(const sx of [-1,1]){relayHeader(g,x+sx,y-1.3,12,.23,.64);g.add(box(.23,.27,.12,metal(),x+sx*.6,y-1.5,.7))}for(let i=0;i<4;i++)smd(g,x-.5+i*.3,y+.9,.72);
+});
+const cpRadio=consoleBoard('SX1262 LoRa radio',2.5,2,0,1.45,0x28643d,'915–918 MHz console LoRa module; 21 dBm maximum transmit power requirement. Representative shield, SPI headers and SMA RF connector. Module variant and supply/logic compatibility remain unconfirmed.',1.4,1.1,(g,x,y)=>{g.add(box(1.6,1.3,.18,metal(),x,y,.74),text('SX1262',1.4,.23,x,y,.85,'#253d46',85),cylZ(.16,.5,gold(),x+.8,y+.7,.88),ring(.17,.025,metal(),x+.8,y+.7,1.15));for(const sx of [-1,1])relayHeader(g,x+sx,y-.6,6,.23,.64)});
+const cpRtcObj=rtcBoard(2.5,1.6,0,-1.35,.55);mov(cpRtcObj,3.7,-1.1,1.4);
+const cpRtc=consolePart('DS3231 RTC','Electronics','DS3231 breakout with backup-cell holder and VCC / GND / SDA / SCL header. Representative 3.3 V I²C connection; selected breakout and backup-cell circuit require confirmation.',cpRtcObj,[0,-1.35,1.1]);
+const consoleBuzzer=new T.Group();consoleBuzzer.add(cylZ(.64,.7,blk(),2,-.5,.98),cylZ(.17,.02,mat(0x050607),2,-.5,1.345),ring(.59,.03,metal(),2,-.5,1.34),text('5 V',.65,.18,2,-.9,1.35),box(1.2,.3,.1,mat(0x28643d),2,-1.55,.55));ic(consoleBuzzer,2,-1.55,.72,.22,.18,3);smd(consoleBuzzer,2.4,-1.55,.7);
+for(const x of [1.6,2.4])consoleBuzzer.add(screw(x,-1.7,.65,.08));mov(consoleBuzzer,4,-.6,2);
+const cpBuzzer=consolePart('5 V active buzzer','Electronics','Active sounder with representative transistor driver, resistor and mounting tabs. USB 5 V powers the buzzer; ESP32 drives its control input through the conceptual driver. This is not a verified electrical schematic.',consoleBuzzer,[2,-.5,1.4]);
+const usb=new T.Group();usb.add(box(.68,.35,.3,blk(),-3,-2.3,.73),wire([[-3,-2.4,.73],[-3,-4.3,.73],[-5,-5,.3],[-7,-4,.3],[-7,-2,.3]],0x252b32),box(.8,1,.35,blk(),-7,-1.6,.3),box(.65,.65,.25,metal(),-7,-.9,.3),box(.48,.5,.03,mat(0x2a6b8c),-7,-.9,.44),text('USB · LAPTOP',2.6,.25,-7,-.2,.6,'#536b76',70));
+const cpUsb=consolePart('USB cable','Power / data','Representative controller USB plug, flexible cable, strain relief and USB-A laptop connector. Supplies 5 V and bidirectional serial data; cable and connector variants are conceptual.',usb,[-7,-1.4,.6]);
+const whip=new T.Group();whip.add(mastTube(.85,.3,6,-2,.7,blk()),mastTube(.58,.3,6,-1.75,.7),mastTube(.09,8,6,2.4,.7,blk()),mastTube(.16,.65,6,-1.2,.7,blk()),mastTube(.12,.7,6,1,.7,blk()));
+whip.add(box(3,.12,3,metal(),6,-2.2,.7),text('3 dBi · MAGNETIC BASE',3.6,.25,6,-2.65,1.1,'#536b76',65));
+const cpWhip=consolePart('3 dBi magnetic-mount whip','Radio','Representative 3 dBi whip on a magnetic base and conceptual steel mounting plate. Feedline routes to the SX1262 SMA connector. Antenna SKU, RF matching and cable length remain unresolved.',whip,[6,3.3,.85]);
+function consoleLead(a,ap,b,bp,color,sag=.15){const mesh=new T.Mesh(new T.BufferGeometry(),mat(color));mesh.userData.part=a;consoleHarness.add(mesh);consolePick.push(mesh);consoleLeads.push({a,ap,b,bp,mesh,sag})}
+for(let i=0;i<7;i++)consoleLead(cpEsp,[-2,-1.3+i*.23,.92],cpRadio,[1,.85+(i%6)*.23,.92],[0xd2ad42,0x528bc7,0x68a477,0x9a78bd,0xd88654,0x8ab8bd,0xd8c078][i],.12+i*.03);
+consoleLead(cpEsp,[-4,-.38,.92],cpRadio,[-1,.85,.92],0xd35343);
+consoleLead(cpEsp,[-4,-.15,.92],cpRadio,[-1,1.08,.92],0x252b32);
+for(let i=0;i<4;i++)consoleLead(cpEsp,[-4,-.84+i*.23,.92],cpRtc,[-.85+i*.55,-1.958,.78],[0xd35343,0x252b32,0x8b73be,0x4c8dbe][i]);
+consoleLead(cpEsp,[-4,-1.3,.92],cpBuzzer,[1.6,-1.55,.65],0xd35343);
+consoleLead(cpEsp,[-4,-1.07,.92],cpBuzzer,[2,-1.55,.65],0x252b32);
+consoleLead(cpEsp,[-2,-1.3,.92],cpBuzzer,[2.4,-1.55,.65],0xd2ad42);
+consoleLead(cpRadio,[.8,2.15,1.15],cpWhip,[6,-1.9,1.3],0x252b32,.5);
+consoleLead(cpUsb,[-3,-2.3,.73],cpEsp,[-3,-1.9,.73],0x252b32);
+let lastConsoleWireSep=-1;
+function updateConsoleLeads(){if(Math.abs(sep-lastConsoleWireSep)<.0005)return;consoleRoot.updateMatrixWorld(true);for(const l of consoleLeads){const a=consoleHarness.worldToLocal(l.a.obj.localToWorld(new T.Vector3(...l.ap))),b=consoleHarness.worldToLocal(l.b.obj.localToWorld(new T.Vector3(...l.bp))),v=b.clone().sub(a),p1=a.clone().addScaledVector(v,.3),p2=a.clone().addScaledVector(v,.7);p1.y-=l.sag;p2.y-=l.sag;p1.z+=.35;p2.z+=.35;const geo=new T.TubeGeometry(new T.CatmullRomCurve3([a,p1,p2,b]),32,.035,8);l.mesh.geometry.dispose();l.mesh.geometry=geo}lastConsoleWireSep=sep}
+
 
 // Research checked 2 October 2026. 'Not found' means no verified model located,
 // not proof that no model exists. Source assets are referenced, not embedded.
@@ -533,66 +593,80 @@ lead('SX1262 LoRa radio',[.26,2.29,.73],'Low-gain helical antenna',[5,.4,1.15],0
 function updateLeads(force=false){if(!force&&!wireDirty&&Math.abs(sep-lastWireSep)<.0005)return;root.updateMatrixWorld(true);wiring.updateMatrixWorld(true);for(const l of leads){const a=wiring.worldToLocal(attachPoint(l.a,l.ap)),b=wiring.worldToLocal(attachPoint(l.b,l.bp)),v=b.clone().sub(a);const p1=a.clone().addScaledVector(v,.3),p2=a.clone().addScaledVector(v,.7);p1.y-=l.sag;p2.y-=l.sag;p1.z+=.35;p2.z+=.35;const geo=new T.TubeGeometry(new T.CatmullRomCurve3([a,p1,p2,b]),24,.035,8);l.mesh.geometry.dispose();l.mesh.geometry=geo;}wireDirty=false;lastWireSep=sep;}
 function exportSetup(){saveActiveView();return {version:2,activeNode,views:{distress:{...nodeRegistry.distress.view},relay:{...nodeRegistry.relay.view}},nodes:{distress:{parts:editable.map(p=>({name:p.name,style:p.edit.style,mm:dimensions(p).toArray(),color:p.edit.color,vertices:p.edit.imported?Array.from(p.edit.imported.geometry.attributes.position.array):null}))}}}}
 function loadSetup(data){const legacy=data.version===1,savedParts=legacy?data.parts:data.version===2?data.nodes?.distress?.parts:null;if(!Array.isArray(savedParts)||savedParts.length>30)throw Error('Invalid setup file');for(const item of savedParts){const p=byName(item.name);if(!p?.edit)continue;if(!Array.isArray(item.mm)||item.mm.length!==3||!item.mm.every(v=>Number.isFinite(v)&&v>=1&&v<=1000))throw Error('Invalid dimensions');if(!['original','headers','light','graphite','dual','32700','pack','imported'].includes(item.style))throw Error('Invalid appearance');if(item.color&&!/^#[a-f\d]{6}$/i.test(item.color))throw Error('Invalid color');if(item.vertices){const check=meshFromVertices(item.vertices);check.geometry.dispose();check.material.dispose()}}
- for(const item of savedParts){const p=byName(item.name);if(!p?.edit)continue;restorePart(p);if(item.vertices)replaceModel(p,meshFromVertices(item.vertices));else setStyle(p,item.style);setDimensions(p,item.mm);if(item.color)setFinish(p,item.color)}if(!legacy){for(const id of ['distress','relay']){const v=data.views?.[id];if(v&&['th','ph','r'].every(k=>Number.isFinite(v[k])))nodeRegistry[id].view={th:v.th,ph:v.ph,r:clamp(v.r,10,id==='relay'?240:70)}}switchNode(['distress','relay','console'].includes(data.activeNode)?data.activeNode:'distress',false)}wireDirty=true;showInfo(sel)}
+ for(const item of savedParts){const p=byName(item.name);if(!p?.edit)continue;restorePart(p);if(item.vertices)replaceModel(p,meshFromVertices(item.vertices));else setStyle(p,item.style);setDimensions(p,item.mm);if(item.color)setFinish(p,item.color)}if(!legacy){for(const id of ['distress','relay']){const v=data.views?.[id];if(v&&['th','ph','r'].every(k=>Number.isFinite(v[k])))nodeRegistry[id].view={th:v.th,ph:clamp(v.ph,.35,2.65),r:clamp(v.r,10,id==='relay'?240:70),pan:id==='relay'&&Number.isFinite(v.pan)?clamp(v.pan,-34.3,34.3):0,focus:['box','antenna','tower'].includes(v.focus)?v.focus:'box'}}switchNode(['distress','relay','console'].includes(data.activeNode)?data.activeNode:'distress',false)}wireDirty=true;showInfo(sel)}
 function initSetupControls(){const save=document.querySelector('#save-setup'),load=document.querySelector('#load-setup');save.onclick=()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(exportSetup())],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='kalasag-component-setup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};load.onchange=async()=>{try{loadSetup(JSON.parse(await load.files[0].text()))}catch(err){const h=document.querySelector('#info h2');h.textContent='Setup could not load';const p=document.querySelector('#info p');p.textContent=err.message}load.value=''}}
 
 /* UI */
 const info=$('#info'),list=$('#list'),tags=$('#tags');let sel=null,helper=null,activeNode='distress',activeParts=parts,activePick=pick;
 function showInfo(p){info.innerHTML='';const h=document.createElement('h2'),c=document.createElement('div'),d=document.createElement('p');c.className='c';
- if(p){h.textContent=p.name;c.textContent=p.cat;d.textContent=(activeNode==='distress'?shortInfo[p.name]:null)||p.spec}else if(activeNode==='relay'){h.textContent='Mobile LoRa relay tower';c.textContent='4 m tripod · conceptual geometry';d.textContent='Relay ready · 915–918 MHz · 18 dBm maximum transmit power. Select a component or expose the low-mounted field enclosure with X-ray / exploded views. The 3.2 m mast and 8 dBi antenna candidates remain unresolved.'}else if(activeNode==='console'){h.textContent='Console node';c.textContent='Operations dashboard';d.textContent='Monitor node health, acknowledge incoming alerts and dispatch a response.'}else{h.textContent='Distress node';c.textContent='Wall-mounted';d.textContent='Select a part to change its size or appearance.'}
+ if(p){h.textContent=p.name;c.textContent=p.cat;d.textContent=(activeNode==='distress'?shortInfo[p.name]:null)||p.spec}else if(activeNode==='relay'){h.textContent='Mobile LoRa relay tower';c.textContent='4 m tripod · conceptual geometry';d.textContent='Relay ready · 915–918 MHz · 18 dBm maximum transmit power. Select a component or expose the low-mounted field enclosure with X-ray / exploded views. The 3.2 m mast and 8 dBi antenna candidates remain unresolved.'}else if(activeNode==='console'){h.textContent='Console node';c.textContent=consoleView==='dashboard'?'SIMULATION · Incident operations':'USB LoRa transceiver · conceptual';d.textContent=consoleView==='dashboard'?'Test incident data is generated locally. Send a test alert, acknowledge its receipt and dispatch a simulated response. Switch to Hardware to inspect the transceiver.':'Select hardware, expose the case with X-ray or explode the assembly. Dashboard shows simulated incidents; no live devices are connected.'}else{h.textContent='Distress node';c.textContent='Wall-mounted';d.textContent='Select a part to change its size or appearance.'}
  info.append(h,c,d);if(p){if(activeNode==='distress')editInfo(p);sourceInfo(p)}}
 function select(p){sel=(sel===p)?null:p;if(helper){scene.remove(helper);helper=null}
  if(sel){helper=new T.BoxHelper(sel.obj,0xff7a2f);helper.material.depthTest=false;helper.renderOrder=10;scene.add(helper)}
  activeParts.forEach(q=>{q.li?.classList.toggle('sel',q===sel);q.tag?.classList.toggle('sel',q===sel)});showInfo(sel)}
-function renderPartList(nodeParts){list.innerHTML='';tags.innerHTML='';for(const p of nodeParts){const li=document.createElement('button');li.innerHTML='<i></i><span></span><em></em>';li.children[0].textContent=p.id;li.children[1].textContent=p.name;li.children[2].textContent=modelSources[p.name]?.kind==='missing'?'Custom':'';li.children[2].className='quiet-status';li.onclick=()=>select(p);const w=document.createElement('li');w.append(li);list.append(w);p.li=li;const t=document.createElement('button');t.className='tag';t.textContent=p.id;t.title=p.name;t.onclick=()=>select(p);tags.append(t);p.tag=t}}
-const consoleBOM=[
- ['ESP32-WROOM-32','Receives relayed LoRa alerts and passes them to the offline laptop over USB serial.'],
- ['SX1262','Console LoRa radio: 915–918 MHz, 21 dBm maximum transmit power; exchanges alerts and confirmations with the mobile relay tower.'],
- ['3 dBi magnetic-mount whip antenna','Low-gain LoRa whip mounted beside the laptop on a magnetic base. Exact supplier SKU remains unresolved.'],
- ['USB cable and small case','USB provides laptop power and the serial data link. Small case protects the transceiver electronics; dimensions remain conceptual.'],
- ['5 V active buzzer','Sounds when a new distress alert reaches the console. Driver wiring remains conceptual.'],
- ['DS3231 RTC','Preserves console-transceiver timestamps through power interruptions; representative breakout.']
-];
-function renderConsoleSidebar(){list.innerHTML='';tags.innerHTML='';consoleBOM.forEach(([title,detail],n)=>{const li=document.createElement('button');li.innerHTML='<i></i><span></span><em></em>';li.children[0].textContent=n+1;li.children[1].textContent=title;li.children[2].textContent='Hardware';li.onclick=()=>{showInfo(null);info.querySelector('h2').textContent=title;info.querySelector('.c').textContent='Console transceiver · conceptual';info.querySelector('p').textContent=detail;list.querySelectorAll('button').forEach(b=>b.classList.toggle('sel',b===li));document.querySelectorAll('[data-console-part]').forEach(g=>g.classList.toggle('selected',Number(g.dataset.consolePart)===n))};const w=document.createElement('li');w.append(li);list.append(w)})}
-
+function renderPartList(nodeParts){list.innerHTML='';tags.innerHTML='';for(const p of nodeParts){const li=document.createElement('button');li.innerHTML='<i></i><span></span><em></em>';li.children[0].textContent=p.id;li.children[1].textContent=p.name;li.children[2].textContent=modelSources[p.name]?.kind==='missing'?'Custom':'';li.children[2].className='quiet-status';li.onclick=()=>{if(activeNode==='console')setConsoleView('hardware');select(p)};const w=document.createElement('li');w.append(li);list.append(w);p.li=li;const t=document.createElement('button');t.className='tag';t.textContent=p.id;t.title=p.name;t.onclick=()=>select(p);tags.append(t);p.tag=t}}
 renderPartList(parts);showInfo(null);initSetupControls();
 
 let sep=0,sepT=0,xr=0,xrT=0,th=.32,thT=.32,ph=1.35,phT=1.35,r=28,rT=28;
 const seg=[...document.querySelectorAll('#seg button')],sl=$('#sl');
-let relayFraming='box';
-const nodeRegistry={distress:{root,parts,pick,title:'KALASAG Survivor Distress Node',subtitle:'Wall-mounted installation · drag to inspect · scroll to zoom',baseR:28,view:{th:.32,ph:1.35,r:28}},relay:{root:relayRoot,parts:relayParts,pick:relayPick,title:'KALASAG Mobile Relay Tower',subtitle:'4 m design target · 5.8 dBi LoRa · conceptual dimensions',baseR:16,view:{th:.38,ph:1.35,r:16}},console:{title:'KALASAG Console Node',subtitle:'BDRRMC alert operations and acknowledgement flow'}};
-function saveActiveView(){const n=nodeRegistry[activeNode];if(n?.view)n.view={th,ph,r}}
-function switchNode(id,updateHash=true){if(!nodeRegistry[id])id='distress';saveActiveView();activeNode=id;const n=nodeRegistry[id];if(helper){scene.remove(helper);helper=null}sel=null;root.visible=id==='distress';relayRoot.visible=id==='relay';stage.classList.toggle('console-mode',id==='console');$('#node-title').textContent=n.title;$('#node-subtitle').textContent=n.subtitle;$('#cap').style.display=id==='console'?'none':'';$('.setup-tools').style.display=id==='distress'?'flex':'none';$('#lid').style.display=id==='distress'?'':'none';$('#guard').style.display=id==='distress'?'':'none';$('#relay-frame').hidden=id!=='relay';document.querySelectorAll('#node-tabs button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.node===id)));if(id==='console'){activeParts=[];activePick=[];renderConsoleSidebar()}else{activeParts=n.parts;activePick=n.pick;renderPartList(activeParts);const v=n.view;th=thT=v.th;ph=phT=v.ph;r=rT=v.r;mode('asm')}showInfo(null);if(id==='relay'){$('#capt').textContent='Relay ready · Automatic alert forwarding';$('#dot').style.background='#2aff6a'}if(updateHash)history.replaceState(null,'','#'+id);resize()}
+let relayFraming='box',consoleView='hardware',panY=0,panYT=0,relayHeightRatio=1;
+const focusTargets={box:new T.Vector3(0,-9,1.8),antenna:new T.Vector3(0,17.2,0),tower:new T.Vector3(0,3,0)};
+const cameraTarget=new T.Vector3(0,0,1.5);
+const nodeRegistry={distress:{root,parts,pick,title:'KALASAG Survivor Distress Node',subtitle:'Wall-mounted installation · drag to inspect · scroll to zoom',baseR:28,view:{th:.32,ph:1.35,r:28}},relay:{root:relayRoot,parts:relayParts,pick:relayPick,title:'KALASAG Mobile Relay Tower',subtitle:'4 m design target · 5.8 dBi LoRa · conceptual dimensions',baseR:16,view:{th:.38,ph:1.35,r:16,pan:0}},console:{root:consoleRoot,parts:consoleParts,pick:consolePick,title:'KALASAG Console Node',subtitle:'USB LoRa transceiver · conceptual geometry · drag to inspect',baseR:32,view:{th:.32,ph:1.25,r:32}}};
+function saveActiveView(){const n=nodeRegistry[activeNode];if(n?.view)n.view={th:thT,ph:phT,r:rT,pan:panYT,focus:activeNode==='relay'?relayFraming:undefined}}
+function setConsoleView(view){consoleView=view;stage.classList.toggle('console-mode',activeNode==='console'&&view==='dashboard');$('#app').classList.toggle('dashboard-mode',activeNode==='console'&&view==='dashboard');document.querySelectorAll('[data-console-view]').forEach(b=>{b.classList.toggle('on',b.dataset.consoleView===view);b.setAttribute('aria-pressed',String(b.dataset.consoleView===view))});$('#node-subtitle').textContent=view==='dashboard'?'SIMULATION · Offline incident operations · no live devices connected':nodeRegistry.console.subtitle;showInfo(view==='dashboard'?null:sel)}
+$('#console-tabs').addEventListener('click',e=>{const b=e.target.closest('[data-console-view]');if(b)setConsoleView(b.dataset.consoleView)});
+function switchNode(id,updateHash=true){if(!nodeRegistry[id])id='distress';saveActiveView();activeNode=id;const n=nodeRegistry[id];if(helper){scene.remove(helper);helper=null}sel=null;
+ root.visible=id==='distress';relayRoot.visible=id==='relay';consoleRoot.visible=id==='console';wall.visible=floor.visible=id==='distress';
+ stage.classList.toggle('console-mode',id==='console'&&consoleView==='dashboard');$('#app').classList.toggle('dashboard-mode',id==='console'&&consoleView==='dashboard');$('#node-title').textContent=n.title;$('#node-subtitle').textContent=n.subtitle;$('#cap').style.display=id==='console'?'none':'';
+ $('.setup-tools').style.display=id==='distress'?'flex':'none';$('#lid').style.display=id==='distress'?'':'none';$('#guard').style.display=id==='distress'?'':'none';$('#relay-focus').hidden=$('#pan-control').hidden=$('#nav-hint').hidden=id!=='relay';$('#console-tabs').hidden=id!=='console';
+ document.querySelectorAll('#node-tabs button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.node===id)));
+ activeParts=n.parts;activePick=n.pick;renderPartList(activeParts);const v=n.view;if(id==='relay'&&focusTargets[v.focus])relayFraming=v.focus;thT=v.th;phT=v.ph;rT=v.r;panYT=v.pan||0;sepT=xrT=0;sl.value=0;seg.forEach(b=>b.classList.toggle('on',b.dataset.m==='asm'));
+ showInfo(null);if(id==='relay'){document.querySelectorAll('[data-focus]').forEach(b=>{b.classList.toggle('on',b.dataset.focus===relayFraming);b.setAttribute('aria-pressed',String(b.dataset.focus===relayFraming))});$('#capt').textContent='Relay ready · Automatic alert forwarding';$('#dot').style.background='#2aff6a';syncHeight()}if(id==='console')setConsoleView(consoleView);
+ if(updateHash)history.replaceState(null,'','#'+id);resize();
+}
 $('#node-tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-node]');if(b)switchNode(b.dataset.node)});window.addEventListener('hashchange',()=>switchNode(location.hash.slice(1),false));
-function mode(m){sepT=m==='exp'?1:0;xrT=m==='xray'?1:0;sl.value=sepT*100;const base=nodeRegistry[activeNode]?.baseR||28;rT=m==='exp'?base+(activeNode==='relay'?8:13):base;seg.forEach(b=>b.classList.toggle('on',b.dataset.m===m))}
+function mode(m){sepT=m==='exp'?1:0;xrT=m==='xray'?1:0;sl.value=sepT*100;const base=nodeRegistry[activeNode]?.baseR||28;rT=m==='exp'?base+(activeNode==='relay'?8:activeNode==='console'?25:13):base;seg.forEach(b=>b.classList.toggle('on',b.dataset.m===m))}
 seg.forEach(b=>b.onclick=()=>mode(b.dataset.m));
-sl.oninput=()=>{sepT=sl.value/100;xrT=0;rT=(nodeRegistry[activeNode]?.baseR||28)+13*sepT;seg.forEach(b=>b.classList.remove('on'))};
+sl.oninput=()=>{sepT=sl.value/100;xrT=0;rT=(nodeRegistry[activeNode]?.baseR||28)+(activeNode==='relay'?8:activeNode==='console'?25:13)*sepT;seg.forEach(b=>b.classList.remove('on'))};
 $('#lb').onchange=e=>tags.classList.toggle('off',!e.target.checked);
-$('#rv').onclick=()=>{const v=nodeRegistry[activeNode]?.view||nodeRegistry.distress.view;thT=v.th;phT=v.ph;rT=(nodeRegistry[activeNode]?.baseR||28)+13*sepT};
-function frameRelay(){const angle=2*Math.atan(Math.tan(cam.fov*Math.PI/360)*Math.min(1,cam.aspect));const fit=(relayFraming==='box'?5:19)/Math.sin(angle/2);nodeRegistry.relay.baseR=fit;r=rT=fit+8*sepT;$('#relay-frame').textContent=relayFraming==='box'?'Full tower':'Focus enclosure';}
-$('#relay-frame').onclick=()=>{relayFraming=relayFraming==='box'?'tower':'box';frameRelay()};
-function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();if(activeNode==='relay')frameRelay()}
-
+function relayFit(){const angle=2*Math.atan(Math.tan(cam.fov*Math.PI/360)*Math.min(relayHeightRatio,cam.aspect));return ({box:5,antenna:4.3,tower:21}[relayFraming])/Math.sin(angle/2)}
+function syncHeight(){const height=(focusTargets[relayFraming].y+panYT+14)/7;$('#mast-height').value=height;$('#height-output').textContent=height.toFixed(1)+' m'}
+function setFocus(focus){relayFraming=focus;panYT=0;nodeRegistry.relay.baseR=relayFit();rT=nodeRegistry.relay.baseR+8*sepT;document.querySelectorAll('[data-focus]').forEach(b=>{b.classList.toggle('on',b.dataset.focus===focus);b.setAttribute('aria-pressed',String(b.dataset.focus===focus))});syncHeight()}
+$('#relay-focus').addEventListener('click',e=>{const b=e.target.closest('[data-focus]');if(b)setFocus(b.dataset.focus)});
+function panHeight(delta){panYT=clamp(focusTargets[relayFraming].y+panYT+delta,-14,20.3)-focusTargets[relayFraming].y;syncHeight()}
+$('#mast-height').oninput=e=>{panYT=Number(e.target.value)*7-14-focusTargets[relayFraming].y;syncHeight()};
+$('#rv').onclick=()=>{$('#ar').checked=false;thT=activeNode==='relay'?.38:.32;phT=activeNode==='console'?1.25:1.35;panYT=0;if(activeNode==='relay')setFocus('box');else rT=nodeRegistry[activeNode].baseR+(activeNode==='console'?25:13)*sepT};
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);cam.aspect=w/h;cam.clearViewOffset();if(activeNode==='relay'){const rect=stage.getBoundingClientRect(),top=$('#inspection-nav').getBoundingClientRect().bottom-rect.top+10,bottom=$('#ctl').getBoundingClientRect().top-rect.top-10;relayHeightRatio=clamp((bottom-top)/h,.25,1);const shift=(top+bottom)/2-h/2;cam.setViewOffset(w,h,0,-shift,w,h)}cam.updateProjectionMatrix();if(activeNode==='relay'){panYT=clamp(focusTargets[relayFraming].y+panYT,-14,20.3)-focusTargets[relayFraming].y;syncHeight();const previous=nodeRegistry.relay.baseR,fit=relayFit();rT=clamp(rT*fit/previous,10,240);nodeRegistry.relay.baseR=fit}else if(activeNode==='console'){const previous=nodeRegistry.console.baseR;nodeRegistry.console.baseR=32/Math.min(1,cam.aspect);rT=rT*nodeRegistry.console.baseR/previous}}
 new ResizeObserver(resize).observe(stage);resize();
 
 /* Console alert simulation. */
-const flowSteps=[...document.querySelectorAll('.flow-step')],eventLog=$('#event-log'),dispatchHelp=$('#dispatch-help');let flowTimers=[];
-function flowLog(message){if(eventLog.textContent==='No active alert.')eventLog.innerHTML='';const li=document.createElement('li');li.textContent=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'})+' · '+message;eventLog.prepend(li)}
-function setFlow(step,message){flowSteps.forEach((el,i)=>el.classList.toggle('on',i<step));if(message)flowLog(message);$('#incident-count').textContent=step>0&&step<4?'1':'0';dispatchHelp.disabled=step<3||step>=4}
-function resetFlow(){flowTimers.forEach(clearTimeout);flowTimers=[];flowSteps.forEach(el=>el.classList.remove('on'));eventLog.innerHTML='<li>No active alert.</li>';$('#incident-count').textContent='0';dispatchHelp.disabled=true}
-$('#test-alert').onclick=()=>{resetFlow();setFlow(1,'NEED HELP alert sent from B3 · 304 · EAST');flowTimers.push(setTimeout(()=>setFlow(2,'Relay R-01 received the LoRa packet and returned acknowledgement'),700),setTimeout(()=>setFlow(3,'Console transceiver received the forwarded LoRa alert over USB; offline console acknowledged incident KSG-001'),1400))};
-dispatchHelp.onclick=()=>setFlow(4,'Response team dispatched; final status returned through Relay R-01');$('#reset-flow').onclick=resetFlow;
+const flowSteps=[...document.querySelectorAll('.flow-step')],eventLog=$('#event-log'),dispatchHelp=$('#dispatch-help'),ackAlert=$('#ack-alert');let flowTimers=[],flowState=0;
+function localTimestamp(){return new Date().toLocaleString(undefined,{hour12:false})}
+function flowLog(message){if(eventLog.textContent==='No active alert.')eventLog.innerHTML='';const li=document.createElement('li');li.textContent=localTimestamp()+' · '+message;eventLog.prepend(li)}
+function setFlow(step,message){if(step<=flowState)return;flowState=step;flowSteps.forEach((el,i)=>el.classList.toggle('on',i<step));if(message)flowLog(message);$('#incident-count').textContent=step>0&&step<4?'1':'0';dispatchHelp.disabled=step<3||step>=4;ackAlert.disabled=step!==2;
+ if(step===2){$('#incident-received').textContent=localTimestamp();$('#incident-ack').textContent='Awaiting acknowledgement'}
+ if(step===3)$('#incident-ack').textContent='Acknowledged · '+localTimestamp();
+ if(step===4)$('#incident-dispatch').textContent='Dispatched · '+localTimestamp();
+}
+function resetFlow(){flowTimers.forEach(clearTimeout);flowTimers=[];flowState=0;flowSteps.forEach(el=>el.classList.remove('on'));eventLog.innerHTML='<li>No active alert.</li>';$('#incident-count').textContent='0';dispatchHelp.disabled=ackAlert.disabled=true;$('#incident-title').textContent='No active incident';for(const field of ['spatial','location','severity','received','ack','dispatch'])$('#incident-'+field).textContent='—'}
+$('#test-alert').onclick=()=>{resetFlow();$('#incident-title').textContent='KSG-001 · Simulated NEED HELP';$('#incident-spatial').textContent='B3 · 304 · EAST';$('#incident-location').textContent='Building 3 · Floor 3 · Room 304 · East zone (test)';$('#incident-severity').textContent='High · NEED HELP';$('#incident-ack').textContent='In transit';$('#incident-dispatch').textContent='Not dispatched';setFlow(1,'Simulated NEED HELP alert sent from B3 · 304 · EAST');flowTimers.push(setTimeout(()=>setFlow(2,'Relay R-01 received the test packet and returned acknowledgement'),700),setTimeout(()=>setFlow(3,'Console transceiver forwarded test incident KSG-001 over USB; simulated auto-acknowledgement'),1400))};
+ackAlert.onclick=()=>{if(flowState===2)setFlow(3,'Operator acknowledged simulated incident KSG-001')};
+dispatchHelp.onclick=()=>{if(flowState===3)setFlow(4,'Simulated response team dispatched; final status returned through Relay R-01')};$('#reset-flow').onclick=resetFlow;
 switchNode(location.hash.slice(1)||'distress',false);
 
-/* orbit input */
+/* One pointer orbits; right / Shift drag pans vertically. Two fingers pan and pinch. */
 const pts=new Map();let moved=0,pinch0=0,drag=false;
-cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=0;drag=true;if(pts.size===2){const[a,b]=[...pts.values()];pinch0=Math.hypot(a.x-b.x,a.y-b.y)}});
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY,pan:e.button===2||e.shiftKey});moved=pts.size>1?99:0;drag=true;if(pts.size===2){const[a,b]=[...pts.values()];pinch0=Math.hypot(a.x-b.x,a.y-b.y)}});
 cv.addEventListener('pointermove',e=>{const p=pts.get(e.pointerId);if(!p)return;const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;
- if(pts.size===1){moved+=Math.abs(dx)+Math.abs(dy);thT-=dx*.008;phT=clamp(phT-dy*.008,.35,2.65)}
- else if(pts.size===2){const[a,b]=[...pts.values()],d=Math.hypot(a.x-b.x,a.y-b.y);rT=clamp(rT*pinch0/d,10,activeNode==='relay'?240:70);pinch0=d;moved=99}});
-const up=e=>{if(!pts.has(e.pointerId))return;if(pts.size===1&&moved<6&&e.type==='pointerup')pickAt(e);pts.delete(e.pointerId);drag=pts.size>0};
-cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
-cv.addEventListener('wheel',e=>{e.preventDefault();rT=clamp(rT*Math.exp(e.deltaY*.001),10,activeNode==='relay'?240:70)},{passive:false});
+ const scale=2*rT*Math.tan(cam.fov*Math.PI/360)/stage.clientHeight;
+ if(pts.size===1){moved+=Math.abs(dx)+Math.abs(dy);if(activeNode==='relay'&&(p.pan||e.shiftKey))panHeight(-dy*scale);else{thT-=dx*.008;phT=clamp(phT-dy*.008,.35,2.65)}}
+ else if(pts.size===2){const[a,b]=[...pts.values()],d=Math.hypot(a.x-b.x,a.y-b.y);if(d>2&&pinch0>2)rT=clamp(rT*pinch0/d,10,activeNode==='relay'?240:100);pinch0=d;if(activeNode==='relay')panHeight(-dy*.5*scale);moved=99}
+});
+const up=e=>{if(!pts.has(e.pointerId))return;if(pts.size===1&&moved<6&&e.type==='pointerup'&&e.button!==2&&!pts.get(e.pointerId).pan)pickAt(e);pts.delete(e.pointerId);drag=pts.size>0};
+cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);cv.addEventListener('lostpointercapture',up);
+cv.addEventListener('wheel',e=>{e.preventDefault();if(activeNode==='relay'&&e.shiftKey)panHeight(-e.deltaY*.01);else rT=clamp(rT*Math.exp(e.deltaY*.001),10,activeNode==='relay'?240:100)},{passive:false});
 const ray=new T.Raycaster(),mp=new T.Vector2();
 function pickAt(e){const b=cv.getBoundingClientRect();mp.set((e.clientX-b.left)/b.width*2-1,-((e.clientY-b.top)/b.height)*2+1);ray.setFromCamera(mp,cam);
  const h=ray.intersectObjects(activePick,false).find(i=>!(xr>.5&&i.object.userData.part.shell));if(h)select(h.object.userData.part)}
@@ -609,19 +683,19 @@ const tmp=new T.Vector3(),tg=new T.Vector3();let last=performance.now();
 function loop(now){requestAnimationFrame(loop);const dt=Math.min((now-last)/1000,.05);last=now;const k=1-Math.exp(-dt*6);
  sep+=(sepT-sep)*k;xr+=(xrT-xr)*k;
  if($('#ar').checked&&!drag)thT+=dt*.22;
- th+=(thT-th)*k;ph+=(phT-ph)*k;r+=(rT-r)*k;
+ th+=(thT-th)*k;ph+=(phT-ph)*k;r+=(rT-r)*k;panY+=(panYT-panY)*k;
  movers.forEach(m=>{m.o.position.z=m.ez*sep;m.o.position.y=m.ey*sep;m.o.position.x=m.ex*sep});
  const tr=xr>.01;shellMats.forEach(m=>{if(m.transparent!==tr){m.transparent=tr;m.needsUpdate=true}m.opacity=1-.88*xr;m.depthWrite=xr<.5});
  labelMats.forEach(m=>m.opacity=1-.7*xr);edgeMat.opacity=.9*xr;
  grid.position.y=-.5-7*sep-(sep>0?.8:0);
- if(activeNode==='relay')tg.set(relayFraming==='box'?-.9*sep:0,relayFraming==='box'?-9:3,relayFraming==='box'?1.8+1.5*sep:2.5);else tg.set(0,.5*sep,1.5+3*sep);
- cam.position.set(tg.x+r*Math.sin(ph)*Math.sin(th),tg.y+r*Math.cos(ph),tg.z+r*Math.sin(ph)*Math.cos(th));cam.lookAt(tg);
- root.updateMatrixWorld(true);relayRoot.updateMatrixWorld(true);if(activeNode==='distress')updateLeads();if(activeNode==='relay')updateRelayLeads();
+ if(activeNode==='relay'){tg.copy(focusTargets[relayFraming]);tg.y+=panY;if(relayFraming==='box'){tg.x-=.9*sep;tg.z+=1.5*sep}}else if(activeNode==='console')tg.set(0,1,1.5+1.5*sep);else tg.set(0,.5*sep,1.5+3*sep);
+ cameraTarget.lerp(tg,k);cam.position.set(cameraTarget.x+r*Math.sin(ph)*Math.sin(th),cameraTarget.y+r*Math.cos(ph),cameraTarget.z+r*Math.sin(ph)*Math.cos(th));cam.lookAt(cameraTarget);
+ root.updateMatrixWorld(true);relayRoot.updateMatrixWorld(true);consoleRoot.updateMatrixWorld(true);if(activeNode==='distress')updateLeads();if(activeNode==='relay')updateRelayLeads();if(activeNode==='console')updateConsoleLeads();
  const W=stage.clientWidth,H=stage.clientHeight;
  activeParts.forEach(p=>{tmp.set(...p.anchor);p.obj.localToWorld(tmp);tmp.project(cam);const v=tmp.z>-1&&tmp.z<1&&Math.abs(tmp.x)<1&&Math.abs(tmp.y)<1;p.tag.style.display=v?'':'none';p.tag.style.transform=`translate(${(tmp.x*.5+.5)*W}px,${(-tmp.y*.5+.5)*H}px)`});
  lidAngle+=(lidTarget-lidAngle)*k;lidPivot.rotation.x=-lidAngle;guardAngle+=(guardTarget-guardAngle)*k;trapPivot.rotation.x=-guardAngle;
  if(helper)helper.update();
- if(activeNode==='distress')ledUpdate(now/1000);renderer.render(scene,cam)}
+ if(activeNode==='distress')ledUpdate(now/1000);if(activeNode!=='console'||consoleView==='hardware')renderer.render(scene,cam)}
 requestAnimationFrame(loop);
 </script>
 </body>
