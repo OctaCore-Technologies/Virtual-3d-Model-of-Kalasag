@@ -3,15 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Interactive 3D model of the KALASAG survivor distress node.">
-<title>KALASAG Distress Node – 3D Model</title>
+<meta name="description" content="Interactive KALASAG distress-node, relay-gateway and emergency-console system viewer.">
+<title>KALASAG Node System – Interactive Model</title>
 <style>
 :root{--bg:#f3f5f8;--panel:#fff;--line:#d5dce5;--tx:#18202a;--mut:#5b697a;--stage:#e6ebf1;--acc:#e8590c;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1218;--panel:#151b23;--line:#273140;--tx:#e7ecf2;--mut:#93a0b0;--stage:#10161d;--acc:#ff7a2f}}
 :root[data-theme="dark"]{--bg:#0d1218;--panel:#151b23;--line:#273140;--tx:#e7ecf2;--mut:#93a0b0;--stage:#10161d;--acc:#ff7a2f}
 html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
-body{margin:0;height:100%;background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
-#app{display:grid;grid-template-columns:1fr 330px;height:100%}
+body{margin:0;height:100%;background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;display:flex;flex-direction:column}
+#node-tabs{height:48px;box-sizing:border-box;display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--panel);border-bottom:1px solid var(--line);flex:none;overflow-x:auto}
+#node-tabs button{border:0;background:none;color:var(--mut);border-radius:8px;padding:8px 14px;font:600 13px/1 system-ui;cursor:pointer;white-space:nowrap}
+#node-tabs button[aria-selected="true"]{background:var(--acc);color:#fff}
+#app{display:grid;grid-template-columns:1fr 330px;flex:1;min-height:0}
 #stage{position:relative;background:var(--stage);min-width:0;min-height:0;overflow:hidden}
 canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
 canvas:active{cursor:grabbing}
@@ -45,14 +48,37 @@ aside{background:var(--panel);border-left:1px solid var(--line);display:flex;fle
 #list span{flex:1}#list em{font-style:normal;font-size:11px;color:var(--mut)}
 @media (max-width:760px){#app{grid-template-columns:1fr;grid-template-rows:1fr 42%}aside{border-left:0;border-top:1px solid var(--line)}#info{min-height:0;padding:12px 16px}.sl input{width:100px}#ctl{bottom:8px;padding:8px;gap:8px}}
 .note{font-size:11px;color:var(--mut);padding:12px 16px;border-top:1px solid var(--line)} #ctl{gap:8px;max-width:90%}.ttl{max-width:85%} #info{min-height:145px;max-height:40%;overflow:auto} .source-info{border-top:1px solid var(--line);margin-top:12px;padding-top:10px;font-size:11px}.source-info p{margin:6px 0!important}.source-info a{display:block;color:var(--acc);margin-top:4px}.badge{font-size:10px;display:inline-block;border-radius:4px;padding:3px 5px;border:1px solid currentColor;font-style:normal}.found{color:#219565}.candidate{color:#b87811}.missing{color:#dd524a}.custom{color:var(--mut)}#list em{max-width:100px;text-align:center;font-size:10px} @media(max-width:760px){#app{grid-template-rows:58% 42%}.note{padding:6px 12px;font-size:10px} #ctl{bottom:6px;padding:6px} .seg button{padding:5px 8px} .ttl b{font-size:15px}#info{max-height:45%;min-height:0}}#info{min-height:110px;max-height:62%;flex-shrink:0}#info h2{font-size:16px}#info p{font-size:12px}.part-editor{margin-top:14px}.part-editor label{display:block;font-size:11px;color:var(--mut);margin-bottom:10px}.part-editor select,.part-editor input[type=number]{box-sizing:border-box;display:block;width:100%;color:var(--tx);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px;margin-top:5px;font:inherit}.dimensions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.part-editor .color-row{display:flex;align-items:center;justify-content:space-between}.color-row input{width:48px;height:28px;border:1px solid var(--line);border-radius:5px;background:var(--bg)}.upload input{display:block;max-width:100%;margin-top:5px;font-size:11px}.fit-note{font-size:10px;color:var(--mut);margin:5px 0 10px}#list button{padding:8px;gap:8px}#list span{font-size:12px}.quiet-status{font-size:9px!important;color:var(--mut)!important}.source-info{margin-top:12px;font-size:11px}.source-info summary{cursor:pointer;color:var(--mut);font-size:11px}.source-info a{font-size:11px}.note{display:none}.setup-tools{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);align-items:center}.setup-tools label{cursor:pointer}@media(max-width:760px){#info{max-height:65%;min-height:0}.part-editor{margin-top:9px}.part-editor label{margin-bottom:6px}.dimensions input{padding:5px}}
+#console-view{display:none;position:absolute;inset:0;padding:70px 24px 24px;box-sizing:border-box;overflow:auto;background:var(--bg)}
+#stage.console-mode canvas,#stage.console-mode #tags,#stage.console-mode #ctl{display:none}
+#stage.console-mode #console-view{display:block}
+.console-grid{display:grid;grid-template-columns:repeat(3,minmax(150px,1fr));gap:12px;max-width:1050px;margin:auto}
+.console-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:0 4px 18px rgba(0,0,0,.06)}
+.console-card h3{margin:0 0 5px;font-size:14px}.console-card p{margin:0;color:var(--mut);font-size:12px}.metric{font-size:24px;font-weight:700;margin:8px 0 2px}.ok{color:#219565}.warn{color:#b87811}.alert{color:#dd524a}
+.flow-card{grid-column:1/-1}.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}.flow-step{border:1px solid var(--line);border-radius:9px;padding:10px;text-align:center;color:var(--mut);font-size:12px}.flow-step.on{background:color-mix(in srgb,var(--acc) 14%,var(--panel));border-color:var(--acc);color:var(--tx)}
+.console-actions{display:flex;gap:8px;flex-wrap:wrap}.console-actions button{background:var(--acc);color:#fff;border:0;border-radius:8px;padding:9px 12px;font:600 12px system-ui;cursor:pointer}.console-actions button.secondary{background:none;color:var(--tx);border:1px solid var(--line)}
+.event-log{margin:12px 0 0;padding:0;list-style:none}.event-log li{border-top:1px solid var(--line);padding:8px 0;font-size:12px;color:var(--mut)}
+@media(max-width:760px){#node-tabs{height:44px;padding:5px 7px}#node-tabs button{padding:7px 10px}.console-grid{grid-template-columns:1fr 1fr}.flow{grid-template-columns:1fr 1fr}#console-view{padding:60px 12px 16px}.flow-card{grid-column:1/-1}}
 </style>
 </head>
 <body>
+<nav id="node-tabs" role="tablist" aria-label="KALASAG node views">
+ <button role="tab" aria-selected="true" data-node="distress">Distress Node</button>
+ <button role="tab" aria-selected="false" data-node="relay">Relay Node</button>
+ <button role="tab" aria-selected="false" data-node="console">Console Node</button>
+</nav>
 <div id="app">
  <div id="stage">
   <canvas id="cv"></canvas>
   <div id="tags" class="off"></div>
-  <div class="ttl"><b>KALASAG Survivor Distress Node</b><div>Wall-mounted installation · drag to inspect · scroll to zoom</div><div id="cap"><span id="dot"></span><span id="capt"></span></div></div>
+  <div class="ttl"><b id="node-title">KALASAG Survivor Distress Node</b><div id="node-subtitle">Wall-mounted installation · drag to inspect · scroll to zoom</div><div id="cap"><span id="dot"></span><span id="capt"></span></div></div>
+  <section id="console-view" aria-label="BDRRMC console dashboard">
+   <div class="console-grid">
+    <article class="console-card"><h3>Distress nodes</h3><div class="metric ok">24 / 24</div><p>Reporting within the expected window</p></article>
+    <article class="console-card"><h3>Relay gateway</h3><div class="metric ok" id="relay-health">Online</div><p>LoRa reception · Wi-Fi backhaul</p></article>
+    <article class="console-card"><h3>Open incidents</h3><div class="metric alert" id="incident-count">0</div><p>Awaiting operator action</p></article>
+    <article class="console-card flow-card"><h3>Alert lifecycle</h3><p>Conceptual end-to-end acknowledgement flow.</p><div class="flow" id="flow"><div class="flow-step">1 · Distress sent</div><div class="flow-step">2 · Relay received</div><div class="flow-step">3 · Console acknowledged</div><div class="flow-step">4 · Help dispatched</div></div><div class="console-actions"><button id="test-alert">Send test alert</button><button id="dispatch-help" class="secondary" disabled>Dispatch response</button><button id="reset-flow" class="secondary">Reset</button></div><ul class="event-log" id="event-log"><li>No active alert.</li></ul></article>
+   </div>
+  </section>
   <div id="ctl">
    <div class="seg" id="seg"><button data-m="asm" class="on">Assembled</button><button data-m="xray">X-ray</button><button data-m="exp">Exploded</button></div>
    <label class="sl">Separation <input id="sl" type="range" min="0" max="100" value="0"></label>
@@ -249,6 +275,27 @@ for(const x of [2.48,4.42])for(const y of [-2.6,-2.1])g.add(cylZ(.07,.05,gold(),
 mov(g,4.1,-1.1,1.6);part('3.3 V buck-boost regulator','Power','Power-path SYS feeds this regulator. Its 3.3 V output feeds the separate distribution rails.',g,[3.45,-2.35,1.05]);
 cg.add(text('BACKUP: 2 × 18650 · 1S2P · 3.2 V / 3 Ah',8.5,.28,0,4.4,3.255,'#a7bcc2',70));
 
+/* Concept relay gateway. Exact purchased modules and enclosure remain to be selected. */
+const relayRoot=new T.Group(),relayParts=[],relayPick=[];relayRoot.visible=false;scene.add(relayRoot);
+function relayPart(name,cat,spec,obj,anchor,shell=false){relayRoot.add(obj);const p={id:relayParts.length+1,name,cat,spec,obj,anchor,shell};relayParts.push(p);obj.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;o.userData.part=p;relayPick.push(o)}});return p}
+const relayBack=new T.Group();shellMesh(ext(rr(10,12,.65),.35,-.4,sm2),relayBack);shellMesh(ext(ringS(10,12,.65,9.3,11.3,.45),2.8,0,sm2),relayBack);mov(relayBack,0,-1.5);
+relayPart('Relay enclosure & gasket','Outer shell','Concept outdoor gateway enclosure. Final ingress rating, dimensions and mounting depend on the selected hardware.',relayBack,[-4.8,0,1.5],true);
+const relayFace=new T.Group();shellMesh(ext(rr(10,12,.65),.3,2.9,sm1),relayFace);relayFace.add(text('KALASAG',3.4,.5,0,4.45,3.25,'#f1f3ed',110),text('RELAY GATEWAY',4.6,.42,0,3.7,3.25,'#a7bcc2',82),text('LoRa → Wi-Fi',3.5,.32,0,-4.6,3.25,'#a7bcc2',78));for(const x of [-4.5,4.5])for(const y of [-5.45,5.45])relayFace.add(screw(x,y,3.26,.14));mov(relayFace,8,2);
+relayPart('Relay front cover','Outer shell','Removable cover with gateway identity and link-status indicators.',relayFace,[4.5,4.5,3.3],true);
+let rg=board(3.2,2.5,0x173c50,-2.5,1.7,.55);ic(rg,-2.5,1.7,.72,.75,.75,16);rg.add(box(.9,.5,.24,metal(),-2.5,2.7,.72),text('ESP32-C3',1.5,.22,-2.5,1.7,.81,'#d8e0e3',85),text('Wi-Fi BACKHAUL',2.2,.18,-2.5,.75,.62,'#eef3f4',68));mov(rg,4,1.6,-1.5);
+relayPart('Relay controller & Wi-Fi backhaul','Electronics','Representative ESP32-C3 gateway controller using Wi-Fi for backhaul. Network credentials, security and offline behavior require implementation.',rg,[-2.5,1.7,1.05]);
+rg=board(3.15,2.25,0x28643d,2.25,1.7,.55);rg.add(box(2.3,1.55,.23,metal(),2.25,1.7,.75),text('SX1262',1.7,.3,2.25,1.8,.88,'#36434c',105),text('RELAY RADIO',1.8,.18,2.25,1.35,.88,'#52616a',70));for(const x of [.8,3.7])pads(rg,x,.85,.63,7,.27);mov(rg,4,1.4,1.4);
+relayPart('Relay SX1262 radio','Radio','Representative LoRa transceiver for receiving distress packets and returning acknowledgements.',rg,[2.25,1.7,1.1]);
+rg=new T.Group();const relayCoil=[];for(let i=0;i<300;i++){const q=i/299,a=q*Math.PI*18;relayCoil.push(new T.Vector3(Math.cos(a)*.26,q*5.5,Math.sin(a)*.26))}const relayAnt=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(relayCoil),360,.055,12),mat(0xb97942,{metalness:.75,roughness:.28}));relayAnt.position.set(-2.3,5.8,1.3);rg.add(relayAnt,box(.8,.45,.35,blk(),-2.3,5.6,1.2));mov(rg,2,3,-1);
+relayPart('LoRa relay antenna','Radio','Concept elevated LoRa antenna. Gain, frequency, placement and feed line must be selected for the deployment.',rg,[-2.3,8.2,1.4]);
+rg=new T.Group();const wifiAnt=new T.Mesh(new T.CylinderGeometry(.12,.16,5.4,48),mat(0x272d34));wifiAnt.position.set(2.3,8.15,1.2);rg.add(wifiAnt,ring(.3,.08,metal(),2.3,5.5,1.2));mov(rg,2.2,3,1);
+relayPart('Wi-Fi backhaul antenna','Network','Representative external Wi-Fi antenna for the assumed IP backhaul.',rg,[2.3,8.1,1.2]);
+rg=board(5.6,2.35,0x255fa8,0,-2.05,.55);rg.add(box(1.15,.85,.45,mat(0x44474d),-1.5,-2.05,.82),box(.95,.75,.35,mat(0xe4e0cc),.25,-2.05,.77),box(1.1,.8,.38,blk(),1.8,-2.05,.78),text('5 V IN · CHARGE · 3V3',4.5,.25,0,-2.9,.63,'#eef3f4',74));mov(rg,3.2,-1.4);
+relayPart('Relay power-path supply','Power','Concept 5 V input, LiFePO4 backup charging and regulated system supply.',rg,[0,-2.05,1.1]);
+rg=new T.Group();for(const x of [-1.7,1.7]){const cell=new T.Mesh(new T.CylinderGeometry(.78,.78,3,72),mat(0x278b80));cell.rotation.z=Math.PI/2;cell.position.set(x,-4.45,1.05);rg.add(cell)}rg.add(box(6.5,1.8,.18,blk(),0,-4.45,.22),text('LiFePO4 BACKUP',4.8,.28,0,-4.4,1.84,'#eff9ee',80));mov(rg,2.8,-2);
+relayPart('Relay backup battery','Power','Representative LiFePO4 backup pack. Capacity must be sized from measured gateway load and outage target.',rg,[0,-4.45,1.9]);
+rg=new T.Group();for(const [x,c] of [[-1.1,0x2aff6a],[0,0x2a6bff],[1.1,0xffb32a]])rg.add(led(x,4.35,.18,c,.7).g);relayPart('Relay link indicators','Front panel','Concept indicators for power, LoRa reception and IP backhaul.',rg,[0,4.35,3.5]);
+
 
 // Research checked 2 October 2026. 'Not found' means no verified model located,
 // not proof that no model exists. Source assets are referenced, not embedded.
@@ -273,6 +320,7 @@ modelSources['LiFePO4 power-path charger']={status:'Custom board',kind:'custom',
 for(const name of ['MCP23017 I/O expander','3.3 V power distribution','3.3 V buck-boost regulator'])modelSources[name]={status:'Custom board',kind:'custom',detail:'Added board concept; no exact purchased module or verified whole-board CAD selected. Replace with the supplier model when selected.',links:[]};
 modelSources['MCP23017 I/O expander'].links=[['Microchip MCP23017','https://www.microchip.com/en-us/product/mcp23017']];
 modelSources['3.3 V buck-boost regulator'].links=[['TI TPS63070','https://www.ti.com/product/TPS63070']];
+for(const name of ['Relay enclosure & gasket','Relay front cover','Relay controller & Wi-Fi backhaul','Relay SX1262 radio','LoRa relay antenna','Wi-Fi backhaul antenna','Relay power-path supply','Relay backup battery','Relay link indicators'])modelSources[name]={status:'Concept model',kind:'custom',detail:'Representative relay-node geometry. Confirm the exact BOM, enclosure, antennas, power design and backhaul before fabrication.',links:[]};
 const switchSource={status:'Candidate model',kind:'candidate',detail:'IP67 panel-button CAD exists (for example Bulgin MAV0120). The proposal gives colors and waterproof rating but no part number. These sources do not prove an exact match for the three buttons shown.',links:[['Bulgin IP67 button and CAD listing','https://www.bulgin.com/pdf/pdf.php?sku=MAV0120%2F3D'],['NKK IP-rated button CAD catalog','https://www.nkkswitches.com/products/ip-rated/']]};
 for(const name of ['SAFE sealed pushbutton','NEED HELP sealed pushbutton','TRAPPED sealed pushbutton'])modelSources[name]=switchSource;
 const enclosureSource={status:'Candidate model',kind:'candidate',detail:'Manufacturer STEP models exist for IP65 ABS enclosures, for example Haewa 2365. The KALASAG cutouts, recessed face, dimensions and mounting layout here are custom and not selected product CAD.',links:[['Haewa ABS 2365 STEP resources','https://www.haewa.com/products/enclosures/small-enclosures/small-enclosures-detail/details/2365-0808-05-00']]};
@@ -388,33 +436,45 @@ lead('5 V cable entry',[4.70,-5.85,1.1],'LiFePO4 power-path charger',[2.4,-.45,.
 lead('SX1262 LoRa radio',[.26,2.29,.73],'Low-gain helical antenna',[5,.4,1.15],0x393127,-.55);
 
 function updateLeads(force=false){if(!force&&!wireDirty&&Math.abs(sep-lastWireSep)<.0005)return;root.updateMatrixWorld(true);wiring.updateMatrixWorld(true);for(const l of leads){const a=wiring.worldToLocal(attachPoint(l.a,l.ap)),b=wiring.worldToLocal(attachPoint(l.b,l.bp)),v=b.clone().sub(a);const p1=a.clone().addScaledVector(v,.3),p2=a.clone().addScaledVector(v,.7);p1.y-=l.sag;p2.y-=l.sag;p1.z+=.35;p2.z+=.35;const geo=new T.TubeGeometry(new T.CatmullRomCurve3([a,p1,p2,b]),24,.035,8);l.mesh.geometry.dispose();l.mesh.geometry=geo;}wireDirty=false;lastWireSep=sep;}
-function exportSetup(){return {version:1,parts:editable.map(p=>({name:p.name,style:p.edit.style,mm:dimensions(p).toArray(),color:p.edit.color,vertices:p.edit.imported?Array.from(p.edit.imported.geometry.attributes.position.array):null}))}}
-function loadSetup(data){if(data.version!==1||!Array.isArray(data.parts)||data.parts.length>30)throw Error('Invalid setup file');for(const item of data.parts){const p=byName(item.name);if(!p?.edit)continue;if(!Array.isArray(item.mm)||item.mm.length!==3||!item.mm.every(v=>Number.isFinite(v)&&v>=1&&v<=1000))throw Error('Invalid dimensions');if(!['original','headers','light','graphite','dual','32700','pack','imported'].includes(item.style))throw Error('Invalid appearance');if(item.color&&!/^#[a-f\d]{6}$/i.test(item.color))throw Error('Invalid color');if(item.vertices){const check=meshFromVertices(item.vertices);check.geometry.dispose();check.material.dispose()}}
- for(const item of data.parts){const p=byName(item.name);if(!p?.edit)continue;restorePart(p);if(item.vertices)replaceModel(p,meshFromVertices(item.vertices));else setStyle(p,item.style);setDimensions(p,item.mm);if(item.color)setFinish(p,item.color)}wireDirty=true;showInfo(sel)}
+function exportSetup(){saveActiveView();return {version:2,activeNode,views:{distress:{...nodeRegistry.distress.view},relay:{...nodeRegistry.relay.view}},nodes:{distress:{parts:editable.map(p=>({name:p.name,style:p.edit.style,mm:dimensions(p).toArray(),color:p.edit.color,vertices:p.edit.imported?Array.from(p.edit.imported.geometry.attributes.position.array):null}))}}}}
+function loadSetup(data){const legacy=data.version===1,savedParts=legacy?data.parts:data.version===2?data.nodes?.distress?.parts:null;if(!Array.isArray(savedParts)||savedParts.length>30)throw Error('Invalid setup file');for(const item of savedParts){const p=byName(item.name);if(!p?.edit)continue;if(!Array.isArray(item.mm)||item.mm.length!==3||!item.mm.every(v=>Number.isFinite(v)&&v>=1&&v<=1000))throw Error('Invalid dimensions');if(!['original','headers','light','graphite','dual','32700','pack','imported'].includes(item.style))throw Error('Invalid appearance');if(item.color&&!/^#[a-f\d]{6}$/i.test(item.color))throw Error('Invalid color');if(item.vertices){const check=meshFromVertices(item.vertices);check.geometry.dispose();check.material.dispose()}}
+ for(const item of savedParts){const p=byName(item.name);if(!p?.edit)continue;restorePart(p);if(item.vertices)replaceModel(p,meshFromVertices(item.vertices));else setStyle(p,item.style);setDimensions(p,item.mm);if(item.color)setFinish(p,item.color)}if(!legacy){for(const id of ['distress','relay']){const v=data.views?.[id];if(v&&['th','ph','r'].every(k=>Number.isFinite(v[k])))nodeRegistry[id].view={th:v.th,ph:v.ph,r:clamp(v.r,10,70)}}switchNode(['distress','relay','console'].includes(data.activeNode)?data.activeNode:'distress',false)}wireDirty=true;showInfo(sel)}
 function initSetupControls(){const save=document.querySelector('#save-setup'),load=document.querySelector('#load-setup');save.onclick=()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(exportSetup())],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='kalasag-component-setup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};load.onchange=async()=>{try{loadSetup(JSON.parse(await load.files[0].text()))}catch(err){const h=document.querySelector('#info h2');h.textContent='Setup could not load';const p=document.querySelector('#info p');p.textContent=err.message}load.value=''}}
 
 /* UI */
-const info=$('#info'),list=$('#list'),tags=$('#tags');let sel=null,helper=null;
+const info=$('#info'),list=$('#list'),tags=$('#tags');let sel=null,helper=null,activeNode='distress',activeParts=parts,activePick=pick;
 function showInfo(p){info.innerHTML='';const h=document.createElement('h2'),c=document.createElement('div'),d=document.createElement('p');c.className='c';
- if(p){h.textContent=p.name;c.textContent=p.cat;d.textContent=shortInfo[p.name]||p.spec}else{h.textContent='Distress node';c.textContent='Wall-mounted';d.textContent='Select a part to change its size or appearance.'}
- info.append(h,c,d);if(p){editInfo(p);sourceInfo(p)}}
+ if(p){h.textContent=p.name;c.textContent=p.cat;d.textContent=shortInfo[p.name]||p.spec}else if(activeNode==='relay'){h.textContent='Relay node';c.textContent='Concept gateway';d.textContent='Select a part to inspect the assumed LoRa-to-Wi-Fi relay design.'}else if(activeNode==='console'){h.textContent='Console node';c.textContent='Operations dashboard';d.textContent='Monitor node health, acknowledge incoming alerts and dispatch a response.'}else{h.textContent='Distress node';c.textContent='Wall-mounted';d.textContent='Select a part to change its size or appearance.'}
+ info.append(h,c,d);if(p){if(activeNode==='distress')editInfo(p);sourceInfo(p)}}
 function select(p){sel=(sel===p)?null:p;if(helper){scene.remove(helper);helper=null}
  if(sel){helper=new T.BoxHelper(sel.obj,0xff7a2f);helper.material.depthTest=false;helper.renderOrder=10;scene.add(helper)}
- parts.forEach(q=>{q.li.classList.toggle('sel',q===sel);q.tag.classList.toggle('sel',q===sel)});showInfo(sel)}
-parts.forEach(p=>{const li=document.createElement('button');li.innerHTML='<i></i><span></span><em></em>';li.children[0].textContent=p.id;li.children[1].textContent=p.name;li.children[2].textContent=modelSources[p.name]?.kind==='missing'?'Custom':'';li.children[2].className='quiet-status';li.onclick=()=>select(p);
- const w=document.createElement('li');w.append(li);list.append(w);p.li=li;
- const t=document.createElement('button');t.className='tag';t.textContent=p.id;t.title=p.name;t.onclick=()=>select(p);tags.append(t);p.tag=t});
-showInfo(null);initSetupControls();
+ activeParts.forEach(q=>{q.li?.classList.toggle('sel',q===sel);q.tag?.classList.toggle('sel',q===sel)});showInfo(sel)}
+function renderPartList(nodeParts){list.innerHTML='';tags.innerHTML='';for(const p of nodeParts){const li=document.createElement('button');li.innerHTML='<i></i><span></span><em></em>';li.children[0].textContent=p.id;li.children[1].textContent=p.name;li.children[2].textContent=modelSources[p.name]?.kind==='missing'?'Custom':'';li.children[2].className='quiet-status';li.onclick=()=>select(p);const w=document.createElement('li');w.append(li);list.append(w);p.li=li;const t=document.createElement('button');t.className='tag';t.textContent=p.id;t.title=p.name;t.onclick=()=>select(p);tags.append(t);p.tag=t}}
+function renderConsoleSidebar(){list.innerHTML='';tags.innerHTML='';for(const [n,title,detail] of [[1,'Distress packet','Spatial ID, alert type and sequence number'],[2,'Relay acknowledgement','Gateway confirms radio reception'],[3,'Console acknowledgement','Operator console accepts the incident'],[4,'Response dispatched','Final status is returned to the survivor node']]){const li=document.createElement('button');li.innerHTML='<i></i><span></span><em></em>';li.children[0].textContent=n;li.children[1].textContent=title;li.children[2].textContent='Flow';li.onclick=()=>{showInfo(null);const p=document.createElement('p');p.style.marginTop='10px';p.textContent=detail;info.append(p)};const w=document.createElement('li');w.append(li);list.append(w)}}
+renderPartList(parts);showInfo(null);initSetupControls();
 
 let sep=0,sepT=0,xr=0,xrT=0,th=.32,thT=.32,ph=1.35,phT=1.35,r=28,rT=28;
 const seg=[...document.querySelectorAll('#seg button')],sl=$('#sl');
-function mode(m){sepT=m==='exp'?1:0;xrT=m==='xray'?1:0;sl.value=sepT*100;rT=m==='exp'?41:28;seg.forEach(b=>b.classList.toggle('on',b.dataset.m===m))}
+const nodeRegistry={distress:{root,parts,pick,title:'KALASAG Survivor Distress Node',subtitle:'Wall-mounted installation · drag to inspect · scroll to zoom',baseR:28,view:{th:.32,ph:1.35,r:28}},relay:{root:relayRoot,parts:relayParts,pick:relayPick,title:'KALASAG Relay Node',subtitle:'Concept LoRa-to-Wi-Fi gateway · representative hardware',baseR:27,view:{th:.28,ph:1.3,r:27}},console:{title:'KALASAG Console Node',subtitle:'BDRRMC alert operations and acknowledgement flow'}};
+function saveActiveView(){const n=nodeRegistry[activeNode];if(n?.view)n.view={th,ph,r}}
+function switchNode(id,updateHash=true){if(!nodeRegistry[id])id='distress';saveActiveView();activeNode=id;const n=nodeRegistry[id];if(helper){scene.remove(helper);helper=null}sel=null;root.visible=id==='distress';relayRoot.visible=id==='relay';stage.classList.toggle('console-mode',id==='console');$('#node-title').textContent=n.title;$('#node-subtitle').textContent=n.subtitle;$('#cap').style.display=id==='console'?'none':'';$('.setup-tools').style.display=id==='distress'?'flex':'none';$('#lid').style.display=id==='distress'?'':'none';$('#guard').style.display=id==='distress'?'':'none';document.querySelectorAll('#node-tabs button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.node===id)));if(id==='console'){activeParts=[];activePick=[];renderConsoleSidebar()}else{activeParts=n.parts;activePick=n.pick;renderPartList(activeParts);const v=n.view;th=thT=v.th;ph=phT=v.ph;r=rT=v.r;mode('asm')}showInfo(null);if(id==='relay'){$('#capt').textContent='Relay online: LoRa and Wi-Fi ready';$('#dot').style.background='#2aff6a'}if(updateHash)history.replaceState(null,'','#'+id);resize()}
+document.querySelectorAll('#node-tabs button').forEach(b=>b.onclick=()=>switchNode(b.dataset.node));window.addEventListener('hashchange',()=>switchNode(location.hash.slice(1),false));
+function mode(m){sepT=m==='exp'?1:0;xrT=m==='xray'?1:0;sl.value=sepT*100;const base=nodeRegistry[activeNode]?.baseR||28;rT=m==='exp'?base+13:base;seg.forEach(b=>b.classList.toggle('on',b.dataset.m===m))}
 seg.forEach(b=>b.onclick=()=>mode(b.dataset.m));
-sl.oninput=()=>{sepT=sl.value/100;xrT=0;rT=28+13*sepT;seg.forEach(b=>b.classList.remove('on'))};
+sl.oninput=()=>{sepT=sl.value/100;xrT=0;rT=(nodeRegistry[activeNode]?.baseR||28)+13*sepT;seg.forEach(b=>b.classList.remove('on'))};
 $('#lb').onchange=e=>tags.classList.toggle('off',!e.target.checked);
-$('#rv').onclick=()=>{thT=.32;phT=1.35;rT=28+13*sepT};
+$('#rv').onclick=()=>{const v=nodeRegistry[activeNode]?.view||nodeRegistry.distress.view;thT=v.th;phT=v.ph;rT=(nodeRegistry[activeNode]?.baseR||28)+13*sepT};
 function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
 new ResizeObserver(resize).observe(stage);resize();
+
+/* Console alert simulation. */
+const flowSteps=[...document.querySelectorAll('.flow-step')],eventLog=$('#event-log'),dispatchHelp=$('#dispatch-help');let flowTimers=[];
+function flowLog(message){if(eventLog.textContent==='No active alert.')eventLog.innerHTML='';const li=document.createElement('li');li.textContent=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'})+' · '+message;eventLog.prepend(li)}
+function setFlow(step,message){flowSteps.forEach((el,i)=>el.classList.toggle('on',i<step));if(message)flowLog(message);$('#incident-count').textContent=step>0&&step<4?'1':'0';dispatchHelp.disabled=step<3||step>=4}
+function resetFlow(){flowTimers.forEach(clearTimeout);flowTimers=[];flowSteps.forEach(el=>el.classList.remove('on'));eventLog.innerHTML='<li>No active alert.</li>';$('#incident-count').textContent='0';dispatchHelp.disabled=true}
+$('#test-alert').onclick=()=>{resetFlow();setFlow(1,'NEED HELP alert sent from B3 · 304 · EAST');flowTimers.push(setTimeout(()=>setFlow(2,'Relay R-01 received the LoRa packet and returned acknowledgement'),700),setTimeout(()=>setFlow(3,'BDRRMC console acknowledged incident KSG-001'),1400))};
+dispatchHelp.onclick=()=>setFlow(4,'Response team dispatched; final status returned through Relay R-01');$('#reset-flow').onclick=resetFlow;
+switchNode(location.hash.slice(1)||'distress',false);
 
 /* orbit input */
 const pts=new Map();let moved=0,pinch0=0,drag=false;
@@ -427,7 +487,7 @@ cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
 cv.addEventListener('wheel',e=>{e.preventDefault();rT=clamp(rT*Math.exp(e.deltaY*.001),10,70)},{passive:false});
 const ray=new T.Raycaster(),mp=new T.Vector2();
 function pickAt(e){const b=cv.getBoundingClientRect();mp.set((e.clientX-b.left)/b.width*2-1,-((e.clientY-b.top)/b.height)*2+1);ray.setFromCamera(mp,cam);
- const h=ray.intersectObjects(pick,false).find(i=>!(xr>.5&&i.object.userData.part.shell));if(h)select(h.object.userData.part)}
+ const h=ray.intersectObjects(activePick,false).find(i=>!(xr>.5&&i.object.userData.part.shell));if(h)select(h.object.userData.part)}
 
 /* status light demo */
 const st=[[2,0xff2a2a,1,'Blinking red: alert sent, waiting for the relay tower'],[2,0x2a6bff,1,'Blinking blue: relay tower has the alert'],[2,0x2a6bff,0,'Steady blue: BDRRMC console has the alert'],[2.5,0x2aff6a,0,'Green: help is on the way']];
@@ -446,14 +506,14 @@ function loop(now){requestAnimationFrame(loop);const dt=Math.min((now-last)/1000
  const tr=xr>.01;shellMats.forEach(m=>{if(m.transparent!==tr){m.transparent=tr;m.needsUpdate=true}m.opacity=1-.88*xr;m.depthWrite=xr<.5});
  labelMats.forEach(m=>m.opacity=1-.7*xr);edgeMat.opacity=.9*xr;
  grid.position.y=-.5-7*sep-(sep>0?.8:0);
- tg.set(0,.5*sep,1.5+3*sep);
+ tg.set(0,(activeNode==='relay'?1.2:.5)*sep,1.5+(activeNode==='relay'?2:3)*sep);
  cam.position.set(tg.x+r*Math.sin(ph)*Math.sin(th),tg.y+r*Math.cos(ph),tg.z+r*Math.sin(ph)*Math.cos(th));cam.lookAt(tg);
- root.updateMatrixWorld(true);updateLeads();
+ root.updateMatrixWorld(true);relayRoot.updateMatrixWorld(true);if(activeNode==='distress')updateLeads();
  const W=stage.clientWidth,H=stage.clientHeight;
- parts.forEach(p=>{tmp.set(...p.anchor);p.obj.localToWorld(tmp);tmp.project(cam);const v=tmp.z<1;p.tag.style.display=v?'':'none';p.tag.style.transform=`translate(${(tmp.x*.5+.5)*W}px,${(-tmp.y*.5+.5)*H}px)`});
+ activeParts.forEach(p=>{tmp.set(...p.anchor);p.obj.localToWorld(tmp);tmp.project(cam);const v=tmp.z<1;p.tag.style.display=v?'':'none';p.tag.style.transform=`translate(${(tmp.x*.5+.5)*W}px,${(-tmp.y*.5+.5)*H}px)`});
  lidAngle+=(lidTarget-lidAngle)*k;lidPivot.rotation.x=-lidAngle;guardAngle+=(guardTarget-guardAngle)*k;trapPivot.rotation.x=-guardAngle;
  if(helper)helper.update();
- ledUpdate(now/1000);renderer.render(scene,cam)}
+ if(activeNode==='distress')ledUpdate(now/1000);renderer.render(scene,cam)}
 requestAnimationFrame(loop);
 </script>
 </body>

@@ -1,6 +1,8 @@
-# KALASAG Distress Node – Interactive 3D Model
+# KALASAG Node System – Interactive Model
 
-An interactive browser-based model of the KALASAG survivor distress node. The viewer includes assembled, X-ray, and exploded views; selectable components; editable component dimensions and appearance; and setup import/export.
+An interactive browser-based model of the KALASAG emergency communication system. It includes a detailed survivor distress node, a conceptual LoRa-to-Wi-Fi relay gateway, and a simulated BDRRMC operations console with an end-to-end acknowledgement flow.
+
+The 3D views include assembled, X-ray, and exploded modes; selectable components; editable distress-node dimensions and appearance; and versioned setup import/export. The relay hardware remains representative until its exact BOM, enclosure, antennas, power design, and backhaul are selected.
 
 ## View the model
 
@@ -16,6 +18,6 @@ Then visit <http://localhost:8000>.
 
 ## Repository layout
 
-- `index.html` — self-contained viewer and 3D model
+- `index.html` — self-contained multi-node viewer, relay concept and console simulation
 - `kalasag_distress_node_3d.html` — compatibility redirect for the original URL
 - `.github/workflows/jekyll-gh-pages.yml` — GitHub Pages deployment workflow
