@@ -77,6 +77,8 @@ aside{background:var(--panel);border-left:1px solid var(--line);display:flex;fle
 #stage.console-mode .ttl{left:0;top:0;max-width:none;width:100%;height:116px;box-sizing:border-box;padding:14px 16px;background:var(--bg)}
 #stage.console-mode #console-view{top:116px;padding:12px 24px 24px}
 @media(max-width:760px){#app.dashboard-mode{grid-template-rows:1fr}#stage.console-mode #console-view{padding:12px}}
+/* Keep the inspection sidebar focused on component selection. */
+aside #info,aside .setup-tools{display:none!important}
 </style>
 </head>
 <body>
@@ -89,7 +91,7 @@ aside{background:var(--panel);border-left:1px solid var(--line);display:flex;fle
  <div id="stage">
   <canvas id="cv"></canvas>
   <div id="tags" class="off"></div>
-  <div class="ttl"><b id="node-title">KALASAG Survivor Distress Node</b><div id="node-subtitle">Wall-mounted installation · drag to inspect · scroll to zoom</div><div id="cap"><span id="dot"></span><span id="capt"></span></div></div>
+  <div class="ttl"><b id="node-title">KALASAG Survivor Distress Node</b><div id="node-subtitle">Wall-mounted installation · drag to inspect · scroll to zoom</div><a href="https://docs.google.com/spreadsheets/d/1QLaJ-uK42XSZoBPESpl_FkiHE4a3wLdfT5JuzkQpVLM/edit?gid=0" target="_blank" rel="noopener noreferrer" style="color:var(--acc);font-size:11px">Components: authoritative Hardware BOM ↗</a><div id="cap"><span id="dot"></span><span id="capt"></span></div></div>
   <div id="inspection-nav">
    <div class="seg" id="relay-focus" hidden aria-label="Relay camera focus"><button data-focus="box" class="on" aria-pressed="true">Enclosure</button><button data-focus="antenna" aria-pressed="false">Antenna</button><button data-focus="tower" aria-pressed="false">Full tower</button></div>
    <label id="pan-control" hidden>Mast height <input id="mast-height" type="range" min="0" max="4.9" step="0.01" value="0.71" aria-label="Camera height in conceptual metres"><output id="height-output">0.7 m</output></label>
@@ -171,6 +173,7 @@ function pads(g,x,y,z,n,dy=.254){for(let i=0;i<n;i++){g.add(ring(.065,.022,gold(
 function trace(g,points){g.add(wire(points,0x95b8a1));}
 
 function rtcBoard(w,h,x,y,z){const g=board(w,h,0x286b89,x,y,z);
+ ic(g,x-w*.2,y-h*.19,z+.18,w*.18,h*.13,8);g.add(text("AT24C32",w*.36,h*.09,x-w*.2,y-h*.19,z+.255,"#edf1ef",72));
  ic(g,x-w*.2,y+h*.12,z+.18,w*.36,h*.28,16);
  g.add(cylZ(h*.23,.1,metal(),x+w*.23,y+h*.04,z+.16),ring(h*.24,.025,blk(),x+w*.23,y+h*.04,z+.22),text('DS3231',w*.7,h*.12,x,y-h*.14,z+.29,'#edf1ef',82));
  for(let i=0;i<4;i++){const px=x-w*.34+i*w*.22;g.add(box(.13,.13,.13,blk(),px,y-h*.38,z+.11),box(.035,.035,.23,gold(),px,y-h*.38,z+.23),text(['VCC','GND','SDA','SCL'][i],w*.19,h*.1,px,y-h*.22,z+.08,'#f0f2ed',72));}
@@ -196,18 +199,18 @@ shellMesh(ext(ringS(11.4,11.4,.5,10.9,10.9,.4),.28,2.62,sm1),cg);
 // Raised surround keeps the button caps below its rim.
 const surround=ext(ringS(10.45,3.7,.35,9.9,3.15,.25),.48,3.2,mat(0x253039,{roughness:.4}));surround.position.y=-.65;shellMesh(surround,cg);
 cg.add(text('KALASAG',3.35,.5,-3.65,2.7,3.255,'#f1f3ed',105),text('SURVIVOR DISTRESS NODE',4,.28,-3.5,2.1,3.255,'#99a9b2',62),text('SPATIAL ID',2.65,.25,3.7,2.9,3.255,'#99a9b2',66),text('B3 · 304 · EAST',2.65,.38,3.7,2.4,3.255,'#f1f3ed',65));
-cg.add(text('STATUS',1.1,.23,-.65,1.95,3.255,'#cdd5da',66),text('BATTERY',1.1,.23,.65,1.95,3.255,'#cdd5da',66),text('LIFT COVER  /  HOLD BUTTON FOR 5 SECONDS',8.9,.32,0,-3.1,3.255,'#ccd5dc',70));
+cg.add(text('STATUS',1.1,.23,-.65,1.95,3.255,'#cdd5da',66),text('BATTERY',1.1,.23,.65,1.95,3.255,'#cdd5da',66),text('HOLD BUTTON FOR 5 SECONDS',8.9,.32,0,-3.1,3.255,'#ccd5dc',70));
 for(const [x,t] of [[-3.2,'SAFE'],[0,'NEED HELP'],[3.2,'TRAPPED']])cg.add(text(t,2.45,.43,x,-1.97,3.27,'#f1f3ed',76));
 for(const x of [-5.5,5.5])for(const y of [-5.45,5.45])cg.add(screw(x,y,3.26,.14));
-part('ABS front cover & recessed panel','Outer shell','Rounded ABS face with recessed button surrounds, captive screws and Spatial ID. IP65 is the proposal enclosure requirement; ingress protection depends on the real enclosure, seals and fittings.',cg,[5.7,2.7,3.3],cover);
+part('ABS front cover & recessed panel','Outer shell','Flame-retardant ABS face with recessed button surrounds, captive screws and Spatial ID. IP65 is the proposal enclosure requirement; ingress protection depends on the real enclosure, seals and fittings.',cg,[5.7,2.7,3.3],cover);
 const base=new T.Group();shellMesh(ext(rr(12,12,.65),.35,-.4,sm2),base);shellMesh(ext(ringS(12,12,.65,11.25,11.25,.45),2.87,0,sm2),base);
 const gasket=ext(ringS(11.6,11.6,.5,11.22,11.22,.42),.08,2.83,blk());base.add(gasket);
 for(const x of [-5.25,5.25])for(const y of [-5.25,5.25])base.add(cylZ(.22,2.4,mat(0x4b565f),x,y,1.1),cylZ(.09,.08,metal(),x,y,2.35));
-part('Fixed rear enclosure & gasket','Outer shell','Wall-fixed ABS tray, screw bosses and perimeter gasket. The back remains attached to the wall when the front is removed for inspection.',base,[-5.85,0,1.4]);
+part('Fixed rear enclosure & gasket','Outer shell','Wall-fixed flame-retardant ABS tray, screw bosses and perimeter gasket. The back remains attached to the wall when the front is removed for inspection.',base,[-5.85,0,1.4]);
 
 function btn(x,col){const g=new T.Group(),y=-.65;g.add(cylZ(.6,.15,metal(),x,y,3.22),ring(.53,.055,blk(),x,y,3.32),cylZ(.46,.14,mat(col,{roughness:.28}),x,y,3.34),cylZ(.4,.88,metal(),x,y,2.64),cylZ(.58,.1,metal(),x,y,2.6,6),box(.7,.65,.6,blk(),x,y,2.05));
 for(const dx of [-.2,.2])g.add(box(.08,.24,.3,gold(),x+dx,y,1.67));return g}
-part('SAFE sealed pushbutton','Front panel','Green IP67 button specified by the proposal, recessed behind the common clear cover. Hold for five seconds to report SAFE. Representative panel-mount button shape.',btn(-3.2,0x219c52),[-3.2,-.65,3.42],cover);
+part('SAFE sealed pushbutton','Front panel','Green IP67 button specified by the proposal, with sealed panel mounting. Hold for five seconds to report SAFE. Representative panel-mount button shape.',btn(-3.2,0x219c52),[-3.2,-.65,3.42],cover);
 part('NEED HELP sealed pushbutton','Front panel','Yellow IP67 button specified by the proposal. Hold for five seconds to report NEED HELP. Switch body and terminals stay inside the case.',btn(0,0xe3b721),[0,-.65,3.42],cover);
 part('TRAPPED sealed pushbutton','Front panel','Red IP67 button under its own lift-up safety guard as required in the paper. Hold for five seconds to report TRAPPED.',btn(3.2,0xc92826),[3.2,-.65,3.42],cover);
 
@@ -215,17 +218,10 @@ const trapPivot=new T.Group();trapPivot.position.set(3.2,.16,3.43);cover.add(tra
 const tgGuard=new T.Group();const redGuard=mat(0xb62725,{roughness:.32});tgGuard.add(box(1.45,1.65,.12,redGuard,0,-.8,.1),box(1.55,.16,.2,redGuard,0,-1.55,.14));
 tgGuard.add(text('LIFT',1,.24,0,-.85,.17,'#ffffff',110));
 const hingeTrap=new T.Mesh(new T.CylinderGeometry(.11,.11,1.5,64),metal());hingeTrap.rotation.z=Math.PI/2;hingeTrap.position.set(0,0,.04);tgGuard.add(hingeTrap);
-part('TRAPPED flip guard','Safety cover','Separate opaque red flip guard prevents an accidental TRAPPED press. Open the common cover first, then lift this guard.',tgGuard,[0,-.8,.25],trapPivot);
-const lidPivot=new T.Group();lidPivot.position.set(0,1.28,3.64);cover.add(lidPivot);
-const lidGroup=new T.Group(),clear=mat(0xc6e5ed,{transparent:true,opacity:.16,roughness:.09,metalness:.05,side:T.DoubleSide,depthWrite:false});
-const glass=ext(rr(10.55,3.95,.3),.085,.12,clear);glass.position.y=-1.96;lidGroup.add(glass);
-const lidFrame=ext(ringS(10.65,4.05,.32,10.42,3.82,.24),.14,.12,mat(0x88969b,{metalness:.65,roughness:.24}));lidFrame.position.y=-1.96;lidGroup.add(lidFrame);
-for(const x of [-3.9,3.9]){const hi=new T.Mesh(new T.CylinderGeometry(.14,.14,1,64),metal());hi.rotation.z=Math.PI/2;hi.position.set(x,0,.08);lidGroup.add(hi)}
-lidGroup.add(box(1.55,.22,.25,mat(0x5b6971),0,-3.97,.2),text('LIFT',1.2,.18,0,-3.98,.335,'#f4f4ee',100));
-part('Clear hinged button cover','Safety cover','Added to address exposed controls: a transparent hinged cover encloses all three recessed buttons. The separate red TRAPPED guard is retained beneath it. This extra common cover is a design interpretation, not specified in the paper.',lidGroup,[5,-2,.3],lidPivot);
-let lidAngle=0,lidTarget=0,guardAngle=0,guardTarget=0;
-$('#lid').onclick=()=>{lidTarget=lidTarget?0:1.9;if(!lidTarget){guardTarget=0;$('#guard').textContent='Lift TRAPPED guard'}$('#lid').textContent=lidTarget?'Close button cover':'Open button cover'};
-$('#guard').onclick=()=>{guardTarget=guardTarget?0:1.85;if(guardTarget){lidTarget=1.9;$('#lid').textContent='Close button cover'}$('#guard').textContent=guardTarget?'Lower TRAPPED guard':'Lift TRAPPED guard'};
+part('TRAPPED flip guard','Safety cover','Separate opaque red flip guard prevents an accidental TRAPPED press. Lift this guard before pressing TRAPPED.',tgGuard,[0,-.8,.25],trapPivot);
+let guardAngle=0,guardTarget=0;
+$('#lid').hidden=true;
+$('#guard').onclick=()=>{guardTarget=guardTarget?0:1.85;$('#guard').textContent=guardTarget?'Lower TRAPPED guard':'Lift TRAPPED guard'};
 function led(x,y,r,col,emi){const g=new T.Group(),m=mat(col,{emissive:col,emissiveIntensity:emi,roughness:.16});const d=new T.Mesh(new T.SphereGeometry(r,48,24),m);d.scale.z=.7;d.position.set(x,y,3.28);g.add(cylZ(r+.07,.08,metal(),x,y,3.22),d,cylZ(r*.75,.6,blk(),x,y,2.91));for(const a of (r>.2?[-.12,-.04,.04,.12]:[-.07,.07]))g.add(box(.025,.025,.4,metal(),x+a,y,2.4));return{g,m}}
 const rgb=led(-.65,2.6,.27,0xff2a2a,1),low=led(.65,2.6,.15,0x8b1616,.05);
 part('RGB status indicator','Front panel','Proposal status sequence: blinking red while awaiting relay acknowledgment, blinking blue after relay acknowledgment, steady blue after console acknowledgment, green when help is on the way. Animation is a visual demo.',rgb.g,[-.65,2.6,3.5],cover);
@@ -246,74 +242,59 @@ g.add(box(1.95,1.5,.22,metal(),-.68,1.57,.73),text('SX1262',1.48,.3,-.68,1.65,.8
 for(const x of [-1.75,.56])pads(g,x,.72,.61,7,.254);
 for(const [x,names] of [[-1.75,['VCC','GND','NSS','SCK','MISO','MOSI','BUSY']],[.56,['RST','DIO1']]])names.forEach((name,i)=>g.add(text(name,.38,.1,x+(x<0?.25:-.25),.72+i*.254,.615,'#eef3f4',75)));
 g.add(cylZ(.11,.065,gold(),.26,2.29,.66),ring(.15,.025,metal(),.26,2.29,.697));
-mov(g,3.4,1.2);part('SX1262 LoRa radio','Electronics','Representative shielded SX1262 module, castellated pads and RF connector. The proposal names the radio chip family but not its module manufacturer or footprint; the displayed package is illustrative.',g,[-.6,1.5,.95]);
+mov(g,3.4,1.2);part('SX1262 LoRa radio','Electronics','Sheet row 6: SX1262 LoRa radio, 915–918 MHz, 21 dBm maximum. Representative shield, castellated pads and RF connector; purchased module footprint remains unconfirmed.',g,[-.6,1.5,.95]);
 
 g=new T.Group();const hx=[];for(let i=0;i<=420;i++){const t=i/420,a=t*Math.PI*16;hx.push(new T.Vector3(Math.cos(a)*.22,t*2.4,Math.sin(a)*.22))}
 const coil=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(hx),500,.045,14),mat(0xc4874b,{metalness:.8,roughness:.24}));coil.position.set(5,.4,1.18);g.add(coil,box(.75,.32,.2,blk(),5,.25,1),cylZ(.13,.15,gold(),5,.4,1.15));
 mov(g,3.2,.8,1.5);part('Low-gain helical antenna','Electronics','Internal helical antenna concept; proposal permits a helical or whip antenna rated at 3 dBi or less. Coil geometry is illustrative and does not establish RF performance.',g,[5,1.6,1.2]);
 
-g=board(3.05,1.4,0x1d57ac,2.67,1.69,.53);
-// Common SW-420/LM393 adjustable module: green switch barrel and blue trim pot.
-const vibration=new T.Mesh(new T.CylinderGeometry(.21,.21,.98,64),mat(0x196d46,{roughness:.28}));vibration.rotation.z=Math.PI/2;vibration.position.set(2.03,1.93,.82);g.add(vibration);
-g.add(box(.64,.68,.47,mat(0x256fd0),3.61,1.68,.86),cylZ(.125,.055,gold(),3.61,1.68,1.12),box(.17,.025,.009,blk(),3.61,1.68,1.15));
-ic(g,2.45,1.27,.72,.5,.3,8);g.add(text('LM393',.47,.1,2.45,1.27,.795,'#a9b4bd',78));
-for(let i=0;i<3;i++){g.add(box(.16,.18,.24,blk(),1.28,1.35+i*.25,.72),box(.05,.055,.56,gold(),1.28,1.35+i*.25,.85))}
-for(let i=0;i<4;i++)smd(g,2.65+i*.19,2.11,.66,.13,.08);g.add(box(.14,.12,.065,mat(0xbc251f),3.25,1.17,.65),text('SW-420',1.02,.18,2.79,1.76,.616,'#f1f4ed',92));
-mov(g,4.9,2.2,1.7);part('SW-420 vibration sensor','Electronics','Common adjustable SW-420 module with cylindrical vibration switch, LM393 comparator, sensitivity trimmer and three-pin header. Board variants differ; sensing behavior and calibration require hardware testing.',g,[2.7,1.7,1.12]);
+g=board(2.4,1.7,0x1d57ac,2.67,1.69,.53);
+ic(g,2.67,1.75,.74,.45,.45,16);g.add(text('ADXL345',1.25,.18,2.67,2.15,.61,'#eff4ed',82),text('GY-291 · X / Y / Z',1.9,.15,2.67,1.14,.61,'#eff4ed',70));
+const accelPins={};['VCC','GND','CS','INT1','INT2','SDO','SDA','SCL'].forEach((n,i)=>{const x=1.78+i*.254;accelPins[n]=[x,1.02,.76];g.add(box(.12,.12,.12,blk(),x,1.02,.65),box(.035,.035,.22,gold(),x,1.02,.76));});
+for(let i=0;i<3;i++)smd(g,1.85+i*.25,2.22,.67,.14,.08);
+mov(g,4.9,2.2,1.7);part('ADXL345 GY-291 accelerometer','Electronics','Sheet row 9: three-axis acceleration, tilt and vibration sensor. Representative GY-291 PCB with ADXL345 IC and eight-pin header; supplier dimensions remain unconfirmed.',g,[2.7,1.7,1.12]);
 
 g=new T.Group();
-const batteryYs=[-2.35,-4.42];
-for(let i=0;i<2;i++){const y=batteryYs[i],cell=new T.Mesh(new T.CylinderGeometry(.9,.9,6.5,96),mat(0x268b80,{roughness:.26}));cell.rotation.z=Math.PI/2;cell.position.set(-2,y,1.06);g.add(cell,box(7.15,1.98,.2,blk(),-2,y,.15));
+const batteryYs=[-3.385];
+for(let i=0;i<batteryYs.length;i++){const y=batteryYs[i],cell=new T.Mesh(new T.CylinderGeometry(.9,.9,6.5,96),mat(0x268b80,{roughness:.26}));cell.rotation.z=Math.PI/2;cell.position.set(-2,y,1.06);g.add(cell,box(7.15,1.98,.2,blk(),-2,y,.15));
  for(const x of [-5.5,1.5])g.add(box(.25,1.98,1.15,blk(),x,y,.63));
  for(const x of [-5.2,1.2]){const cap=new T.Mesh(new T.CylinderGeometry(.84,.84,.055,96),metal());cap.rotation.z=Math.PI/2;cap.position.set(x,y,1.06);g.add(cap)}
  const nub=new T.Mesh(new T.CylinderGeometry(.3,.3,.12,64),metal());nub.rotation.z=Math.PI/2;nub.position.set(1.3,y,1.06);g.add(nub);
  g.add(text('CELL '+(i+1)+' · LiFePO4 · 1500 mAh',5.6,.26,-2,y,1.971,'#e4f3df',78),text('+',.42,.42,.6,y,1.92,'#fff',100),text('−',.42,.42,-4.65,y,1.92,'#fff',100));
 }
-// Separate positive and negative bus strips. Both cells face the same way.
-g.add(box(.14,2.35,.045,mat(0xc94938),1.3,-3.385,1.1),box(.14,2.35,.045,mat(0x30343b),-5.32,-3.385,1.1));
-for(const y of batteryYs)g.add(box(.2,.1,.045,metal(),-5.24,y,1.1));
-g.add(text('1S2P  ·  PARALLEL  ·  3.2 V / 3 Ah',6.2,.29,-2,-3.385,1.96,'#e4f3df',82));
-mov(g,2.6,-1.7,-1.2);part('IFR18650 LiFePO4 backup cell','Power','Two 3.2 V / 1500 mAh cells in parallel: 1S2P, 3.2 V / 3000 mAh. Equal poles are joined; the pack is connected through a 1S LiFePO4 BMS.',g,[-2,-3.385,2.05]);
+mov(g,2.6,-1.7,-1.2);part('IFR18650 LiFePO4 backup cell','Power','Sheet row 11: 3.2 V / 1500 mAh IFR18650 cell. One representative cell is displayed; the sheet does not specify pack quantity or topology. No parallel pack or aggregate capacity is assumed.',g,[-2,-3.385,2.05]);
 
 
 g=board(2.45,1.65,0x235ea8,3.45,-.72,.53);
-g.add(box(.74,.36,.2,metal(),3.7,-.1,.73),box(.55,.08,.08,blk(),3.7,.065,.73),box(.45,.4,.25,mat(0xe4e0cc),3.75,-.78,.74));
-ic(g,3.01,-.72,.7,.3,.3,8);for(const x of [2.95,3.43])smd(g,x,-1.23,.68,.29,.17);
-g.add(box(.13,.13,.07,mat(0x9c2525),3.14,-.15,.68),box(.13,.13,.07,mat(0x238249),3.43,-.15,.68));
-for(const x of [2.4,4.5])pads(g,x,-1.05,.61,3,.3);
-for(const [t,x,y] of [['SYS−',2.4,-1.05],['IN+',2.4,-.75],['IN−',2.4,-.45],['BAT+',4.5,-1.05],['BAT−',4.5,-.75],['SYS+',4.5,-.45]])g.add(text(t,.38,.1,x+(x<3?.28:-.28),y,.615,'#eeeeee',75));
-g.add(text('BQ25185',1.05,.17,3.68,-.21,.605,'#eef3f4',90),text('POWER PATH  3.65V',1.3,.14,3.45,-1.4,.605,'#eef3f4',68));
-mov(g,3.8,-.6,2);part('LiFePO4 power-path charger','Power','Representative LiFePO4 charger with dedicated IN, SYS and BAT terminals. BQ25185-based power-path design configured for the selected cells.',g,[3.45,-.72,1.08]);
+ic(g,3.01,-.72,.72,.4,.4,8);g.add(box(.65,.65,.4,mat(0x41474d),3.8,-.65,.8),text('4R7',.5,.16,3.8,-.65,1.01,'#dddddd',80));
+for(const x of [2.95,3.43])smd(g,x,-1.23,.68,.29,.17);
+for(const [t,x,y] of [['IN+',2.4,-.75],['IN−',2.4,-.45],['BAT+',4.5,-1.05],['BAT−',4.5,-.75]]){g.add(cylZ(.07,.06,gold(),x,y,.63),text(t,.38,.1,x+(x<3?.28:-.28),y,.615,'#eeeeee',75));}
+g.add(text('TP5000',1.05,.17,3.45,-.21,.605,'#eef3f4',90),text('LiFePO4 · SET 3.6 V',1.8,.14,3.45,-1.4,.605,'#eef3f4',68));
+mov(g,3.8,-.6,2);part('TP5000 LiFePO4 charger','Power','Sheet row 12: TP5000 charger set to 3.6 V, with IN and BAT terminals. No dedicated SYS power-path output is specified. Load regulation and simultaneous charging/load operation remain unresolved in the BOM.',g,[3.45,-.72,1.08]);
 
 g=board(2.1,.86,0x2c7554,3.4,-4.45,.53);ic(g,3,-4.45,.7,.46,.32,6);ic(g,3.75,-4.45,.7,.48,.3,8);for(const x of [2.55,4.25])pads(g,x,-4.63,.61,2,.36);smd(g,3.35,-4.23,.68,.18,.08);
 g.add(text('1S LiFePO4 BMS',1.45,.14,3.4,-4.77,.607,'#efefef',74));for(const [t,x,y] of [['B+',2.55,-4.63],['B−',2.55,-4.27],['P+',4.25,-4.63],['P−',4.25,-4.27]])g.add(text(t,.28,.11,x+(x<3?.18:-.18),y,.614,'#eeeeee',82));
 mov(g,3.1,-2.3,1.8);part('1S LiFePO4 BMS','Power','Representative single-cell LiFePO4 protection PCB with controller, MOSFETs and battery pads. Match the selected board to LiFePO4 thresholds; generic lithium-ion protection boards are not interchangeable.',g,[3.4,-4.45,.85]);
 
 const wiring=new T.Group();
-part('Internal wiring harness','Assembly','Wires follow the components when separated or resized.',wiring,[1.6,0,.6]);
+part('Internal wiring harness','Assembly','Sheet row 36: representative jumper/hookup wires follow parts in exploded mode. Button/LED GPIO allocation, resistor values and regulated load supply remain unspecified; these connections are intentionally not invented. Solder, flux and IPA are assembly supplies, not installed modules.',wiring,[1.6,0,.6]);
 const gland=new T.Group();const glandBody=new T.Mesh(new T.CylinderGeometry(.25,.25,.55,64),blk());glandBody.position.set(4.65,-6.1,1.1);gland.add(glandBody);
 gland.add(wire([[4.65,-6.32,1.1],[4.65,-7.1,.9],[4.35,-8,.3],[4.35,-10,-.5]],0x292f34));
 part('5 V cable entry','Installation','Concept bottom cable gland and incoming 5 V adapter lead. Sealing hardware must be selected for the enclosure’s intended ingress protection.',gland,[4.65,-6.15,1.1]);
 
-g=board(3.1,1.55,0x287f82,-3.6,-.62,.53);ic(g,-3.6,-.62,.72,1.35,.5,28);g.add(text('MCP23017',1.28,.15,-3.6,-.62,.796,'#dddddd',90));
-for(let i=0;i<8;i++)for(const [y,prefix] of [[-1.15,'PA'],[-.15,'PB']]){const x=-4.6+i*.254;g.add(cylZ(.055,.06,gold(),x,y,.63),text(prefix+i,.21,.09,x,y+(prefix==='PA'?.14:-.14),.616,'#eeeeee',80));}
-for(let i=0;i<5;i++)g.add(cylZ(.055,.06,gold(),-2.18,-.15-i*.23,.64));
-for(let i=0;i<4;i++)smd(g,-4.5+i*.4,-.72,.69,.23,.09);
-g.add(text('LED RESISTORS',1.4,.1,-4,-.9,.617,'#eeeeee',70));
-mov(g,4.8,-.3,-1.6);part('MCP23017 I/O expander','Electronics','Dedicated inputs for three buttons and vibration; separate LED outputs with series resistors. SDA, SCL and interrupt each use their own ESP32 pin.',g,[-3.6,-.62,.95]);
-
-g=board(2.2,1.25,0x3a7155,-.6,-.65,.53);
-for(let i=0;i<8;i++){const x=-1.45+i*.254;g.add(cylZ(.07,.06,gold(),x,-.25,.64),cylZ(.07,.06,gold(),x,-1.05,.64));}
-g.add(box(2,.065,.045,mat(0xc3422c),-.55,-.25,.58),box(2,.065,.045,mat(0x292d34),-.55,-1.05,.58),text('3V3 +',.9,.16,-.6,-.48,.618,'#e7eeee',90),text('GND −',.9,.16,-.6,-.83,.618,'#e7eeee',90));
-mov(g,3.2,-.2,.3);part('3.3 V power distribution','Power','Separate 3.3 V and ground rails with individual connection pads. Only pads on the same labeled rail share a net.',g,[-.6,-.65,.75]);
-
-g=board(2.2,1.2,0x255fa8,3.45,-2.35,.53);g.add(box(.6,.6,.42,mat(0x44474d),3.75,-2.35,.78),text('3.3 V',.7,.16,3.25,-2.72,.618,'#ffffff',95));ic(g,3.04,-2.35,.72,.4,.4,8);
-for(const x of [2.48,4.42])for(const y of [-2.6,-2.1])g.add(cylZ(.07,.05,gold(),x,y,.63));
-mov(g,4.1,-1.1,1.6);part('3.3 V buck-boost regulator','Power','Power-path SYS feeds this regulator. Its 3.3 V output feeds the separate distribution rails.',g,[3.45,-2.35,1.05]);
-cg.add(text('BACKUP: 2 × 18650 · 1S2P · 3.2 V / 3 Ah',8.5,.28,0,4.4,3.255,'#a7bcc2',70));
+const adapter=new T.Group();adapter.add(box(2.5,3.1,1.6,blk(),8,-7.6,.5),box(.16,.6,.12,metal(),7.6,-5.9,.3),box(.16,.6,.12,metal(),8.4,-5.9,.3),text('5 V DC',2,.35,8,-7.6,1.32,'#eeeeee',80));
+mov(adapter,1,-.4,1);part('5 V wall adapter','Power','Sheet row 14: external 5 V wall adapter supplying the TP5000 input. Body, mains prongs and DC lead are illustrative; connector fit is unconfirmed.',adapter,[8,-7.6,1.4]);
+const resistors=new T.Group();
+for(let i=0;i<6;i++){const x=-4.6+i*.65,y=-.55;resistors.add(box(.45,.19,.19,mat(0xc8b891),x,y,.73),box(.7,.025,.025,metal(),x,y,.73));for(const dx of [-.13,0,.13])resistors.add(box(.035,.2,.2,mat(dx===.13?0x80522c:0x3f4855),x+dx,y,.73));}
+resistors.add(text('1/4 W · 1% · LED + DIVIDER',3.6,.16,-3,-.97,.65,'#edf1ef',65));
+mov(resistors,4,-.3,-1.6);part('1/4 W 1% resistors','Passive components','Sheet row 17: representative axial resistors for RGB/red LEDs and a two-resistor battery-voltage divider. Resistance values and GPIO allocation are unspecified; bands do not encode selected values.',resistors,[-3,-.55,.9]);
+const capacitors=new T.Group();
+for(const [x,y] of [[-2.65,3.05],[1.15,3.05]]){capacitors.add(cylZ(.23,.65,mat(0x253c56),x,y,.91),cylZ(.22,.04,metal(),x,y,1.25),box(.3,.025,.01,blk(),x,y,1.275),box(.025,.3,.01,blk(),x,y,1.275));for(const dx of [-.09,.09])capacitors.add(box(.025,.025,.25,metal(),x+dx,y,.49));}
+mov(capacitors,3.6,1.7,.3);part('Electrolytic supply capacitors','Passive components','Sheet row 18: electrolytic supply capacitors placed beside the ESP32 and SX1262. Capacitance, voltage rating and quantity require circuit selection; two representative capacitors are displayed.',capacitors,[1.15,3.05,1.3]);
+cg.add(text('IFR18650 · 3.2 V · 1500 mAh / CELL',8.5,.28,0,4.4,3.255,'#a7bcc2',70));
 
 const nodeRtc=rtcBoard(2.8,1.8,0,4.15,.53);mov(nodeRtc,4.4,2.5,.8);
-const nodeRtcPart=part('DS3231 RTC module','Electronics','Representative DS3231 RTC breakout with backup-cell holder, headers and passive components. Shares the 3.3 V I²C bus with the MCP23017: GPIO20 SDA and GPIO21 SCL. Dimensions and backup-cell variant remain conceptual.',nodeRtc,[0,4.15,.95]);
+const nodeRtcPart=part('DS3231 RTC module','Electronics','Representative DS3231 RTC breakout with backup-cell holder, headers and passive components. Includes AT24C32 EEPROM and shares conceptual I²C with ADXL345: GPIO20 SDA and GPIO21 SCL. Dimensions and backup-cell variant remain conceptual.',nodeRtc,[0,4.15,.95]);
 nodeRtcPart.source={status:'Concept model',kind:'custom',detail:'DS3231 RTC requested for the distress node. Representative breakout geometry and shared I²C bus wiring; supplier footprint remains unconfirmed.',links:[]};
 
 /* Mobile relay tower: 7 display units per metre; enclosure/module geometry is conceptual. */
@@ -329,10 +310,14 @@ for(const y of [-12,-8,-5,2,8]){tower.add(mastTube(.38,.36,0,y,0,blk()),box(.6,.
 tower.add(text('4 m DESIGN TARGET',4.8,.35,-3,4,.4,'#8a681d',68));
 relayPart('4 m telescopic tripod','Mounting','4 m extendable tripod design target, deployed outside the collapse area. Three folding legs, rubber feet, braces, telescoping sections and locking collars. Sheet candidate reaches 3.2 m; exact SKU unresolved.',tower,[0,5,.35]);
 const antenna=new T.Group();antenna.add(mastTube(.15,6,0,17.2,0,mat(0xe9eee6)),mastTube(.22,.4,0,14.4,0),mastTube(.17,.25,0,20.3,0,mat(0xd7ded3)));
-relayPart('5.8 dBi fiberglass antenna','Radio','One elevated fiberglass LoRa antenna; 5.8 dBi requirement, 915–918 MHz. Sheet lists an 8 dBi candidate; it is unresolved and does not replace the requirement.',antenna,[0,18.8,.2]);
-const coax=new T.Group();coax.add(wire([[.2,14.4,0],[.42,14.1,.12],[.42,8,.12],[.42,2,.12],[.42,-6,.12],[.6,-6.75,.9],[.6,-7.3,.9]],0x252c33));
+relayPart('5.8 dBi fiberglass antenna','Radio','One elevated fiberglass LoRa antenna; 5.8 dBi requirement, 915–918 MHz. Sheet cost/listing note says 8 dBi, conflicting with the 5.8 dBi component name; the named requirement is shown.',antenna,[0,18.8,.2]);
+// Piecewise centerline avoids Catmull-Rom overshoot on the long mast drop.
+const coax=new T.Group(),coaxPath=new T.CurvePath();
+const coaxPoints=[[.2,14.4,0],[.42,14.1,.12],[.42,8,.12],[.42,2,.12],[1,-4.95,1.5]];
+for(let i=1;i<coaxPoints.length;i++)coaxPath.add(new T.LineCurve3(new T.Vector3(...coaxPoints[i-1]),new T.Vector3(...coaxPoints[i])));
+coax.add(new T.Mesh(new T.TubeGeometry(coaxPath,128,.045,12),mat(0x252c33)));
 for(const y of [12,8,4,0,-4])coax.add(mastTube(.3,.07,.12,y,0,blk()));
-relayPart('3 m low-loss SMA coax cable','Radio','3 m low-loss feedline, N-male antenna end to SMA radio end. Routed down the mast into a sealed antenna feed-through. The 3 m BOM length may be insufficient with this low enclosure at full mast extension; connector, slack and deployed routing length require fit confirmation.',coax,[.5,10,.2]);
+relayPart('3 m low-loss SMA coax cable','Radio','3 m low-loss feedline, N-male antenna end to SMA radio end. Routed down the mast into a sealed antenna feed-through. Direct conceptual route enters the top gland; external plus internal centerline is measured against 3 m at 7 display units/metre. Remaining slack and supplier connectors require fit confirmation.',coax,[.5,10,.2]);
 const hardware=new T.Group();for(const y of [-7,-11,14.2]){hardware.add(box(1.15,.28,.18,metal(),0,y,.4),wire([[-.45,y-.22,.4],[-.45,y-.22,-.4],[0,y+.3,-.45],[.45,y-.22,-.4],[.45,y-.22,.4]],0xbac2cb));for(const x of [-.45,.45])hardware.add(screw(x,y-.22,.55,.1))}
 hardware.add(box(.45,.65,.35,metal(),0,14.2,0));
 relayPart('Mast clamps and U-bolts','Mounting','Top antenna clamp, enclosure mounting brackets, U-bolts and mast clamps. Final fastener sizes and clamp compatibility depend on supplier SKUs.',hardware,[.7,-7,.5]);
@@ -347,12 +332,11 @@ relayCover.add(text('KALASAG',3.8,.5,0,-7,4.01,'#f1f3ed',100),text('MOBILE LoRa 
 for(const x of [-2,2])for(const y of [-12.6,-5.4])relayCover.add(screw(x,y,4.03,.12));
 mov(relayCover,5,.8,-7);relayHousing.add(relayRear,relayCover);
 for(const x of [-1,1])relayHousing.add(mastTube(.22,.48,x,-5.15,1.5,blk()));
-relayHousing.add(box(.6,.28,.2,mat(0xece2b5),-1.65,-9,1.6),box(.28,.12,.18,metal(),-1.95,-9,1.6),box(.28,.12,.18,metal(),-1.35,-9,1.6),text('12 V FUSE',1.5,.18,-1,-9.4,1.75,'#36434c',72));
 relayRear.add(ext(ringS(4.6,7.8,.18,4.4,7.6,.12),.07,3.65,blk()));relayRear.children[relayRear.children.length-1].position.y=-9;
 for(const x of [-1,1]){relayHousing.add(mastTube(.28,.15,x,-5.05,1.5,metal()),mastTube(.15,.25,x,-4.95,1.5,blk()));}
-relayPart('IP66 weatherproof junction box','Outer shell','Conceptual field housing with dimensions pending supplier selection, removable gasketed lid, mounting plate, sealed cable glands, antenna feed-through, fused 12 V input and battery lead. Battery and electronics share the low-mounted housing. IP66 is the required purchased rating, not verified by this model; exact box dimensions and battery fit remain unconfirmed.',relayHousing,[2.4,-8,3.9],true);
+relayPart('IP66 weatherproof junction box','Outer shell','Conceptual field housing with dimensions pending supplier selection, removable gasketed lid, mounting plate, sealed cable glands, antenna feed-through, 12 V input and battery lead. Battery and electronics share the low-mounted housing. IP66 is the required purchased rating, not verified by this model; exact box dimensions and battery fit remain unconfirmed.',relayHousing,[2.4,-8,3.9],true);
 const relayBattery=new T.Group();relayBattery.add(box(3.8,2.4,2,mat(0x242b33),0,-11.5,2.4),box(3.8,.2,2,blk(),0,-10.2,2.4),box(.3,.18,.3,mat(0xd65543),-1.1,-10.05,2.4),box(.3,.18,.3,metal(),1.1,-10.05,2.4),text('12 V 7 Ah',2.8,.35,0,-11.5,3.43,'#eff3ef',90));mov(relayBattery,2,-1,0);
-relayPart('12 V 7 Ah battery','Power','Field battery housed below the electronics to keep the center of gravity low. Chemistry, purchased dimensions, retention strap and fit must be confirmed. Fused lead supplies the LM2596; no relay charging circuit is specified.',relayBattery,[0,-11.5,3.45]);
+relayPart('12 V 7 Ah battery','Power','Field battery housed below the electronics to keep the center of gravity low. Chemistry, purchased dimensions, retention strap and fit must be confirmed. Battery lead supplies the LM2596; no relay charging circuit is specified.',relayBattery,[0,-11.5,3.45]);
 function relayBoard(name,w,h,x,y,color,spec,ex,ey,decorate){const g=board(w,h,color,x,y,1.45);
  for(const sx of [-1,1])for(const sy of [-1,1])g.add(cylZ(.08,.22,metal(),x+sx*(w/2-.15),y+sy*(h/2-.15),1.28));
  decorate(g,x,y);mov(g,3,ey,ex);const p=relayPart(name,'Electronics',spec,g,[x,y,1.95]);return p;
@@ -377,7 +361,7 @@ const relayBuck=relayBoard('LM2596 step-down converter',1.8,1.1,-1,-8.45,0x255fa
  for(const sx of [-.74,.74])pads(g,x+sx,y-.25,1.55,2,.48);
  g.add(text('IN',.27,.12,x-.63,y-.1,1.65,'#eff2ee',80),text('OUT',.33,.12,x+.56,y-.1,1.65,'#eff2ee',80),text('LM2596',.75,.12,x,y-.43,1.55,'#eff2ee',75));
 });
-const relayRtc=relayBoard('DS3231 RTC module',1.6,1.1,1,-8.4,0x286b89,'Real-time clock for relay timestamps during power interruptions. Representative DS3231 IC, backup-cell holder and I²C header.',1,-.5,(g,x,y)=>{
+const relayRtc=relayBoard('DS3231 RTC module',1.6,1.1,1,-8.4,0x286b89,'Real-time clock for relay timestamps during power interruptions. Representative DS3231 IC, AT24C32 EEPROM, backup-cell holder and I²C header.',1,-.5,(g,x,y)=>{
  const detail=rtcBoard(1.6,1.1,x,y,1.45);detail.children.slice(5).forEach(o=>g.add(o));
 });
 for(const x of [-1.4,1.4])relayBattery.add(box(.17,2.45,.08,blk(),x,-11.5,3.47));
@@ -389,8 +373,7 @@ for(const p of relayParts.filter(p=>p.obj===relayHousing||p.obj===relayBattery||
 const relayHarness=new T.Group(),relayLeads=[];relayRoot.add(relayHarness);let lastRelayWireSep=-1;
 function relayLead(a,ap,b,bp,color,sag=.12){const mesh=new T.Mesh(new T.BufferGeometry(),mat(color,{roughness:.6}));mesh.castShadow=true;mesh.userData.part=a;relayHarness.add(mesh);relayPick.push(mesh);relayLeads.push({a,ap,b,bp,mesh,sag})}
 const relayBoxPart=relayParts.find(p=>p.obj===relayHousing),relayBatteryPart=relayParts.find(p=>p.obj===relayBattery);
-relayLead(relayBatteryPart,[-1.1,-10.05,2.6],relayBoxPart,[-1.95,-9,1.6],0xd35343);
-relayLead(relayBoxPart,[-1.35,-9,1.6],relayBuck,[-1.74,-8.7,1.6],0xd35343);
+relayLead(relayBatteryPart,[-1.1,-10.05,2.6],relayBuck,[-1.74,-8.7,1.6],0xd35343);
 relayLead(relayBatteryPart,[1.1,-10.05,2.6],relayBuck,[-1.74,-8.22,1.6],0x252b32);
 // Supply and I²C are representative nets; exact terminal assignments await supplier boards.
 for(const [p,vcc,gnd] of [[relayController,[-1.68,-6.3,1.8],[-1.68,-6.48,1.8]],[relayRadio,[.31,-6.91,1.8],[.31,-6.71,1.8]],[relayRtc,[.46,-8.818,1.8],[.812,-8.818,1.8]]]){
@@ -399,7 +382,7 @@ for(const [p,vcc,gnd] of [[relayController,[-1.68,-6.3,1.8],[-1.68,-6.48,1.8]],[
 for(let i=0;i<7;i++)relayLead(relayController,[-.32,-7.2+i*.18,1.8],relayRadio,[i<6?1.69:.31,-6.91+(i%6)*.2,1.8],[0xd2ad42,0x528bc7,0x68a477,0x9a78bd,0xd88654,0x8ab8bd,0xd8c078][i],.08+i*.025);
 relayLead(relayController,[-1.68,-6.84,1.8],relayRtc,[1.164,-8.818,1.8],0x8b73be);
 relayLead(relayController,[-1.68,-7.02,1.8],relayRtc,[1.516,-8.818,1.8],0x4c8dbe);
-relayLead(relayRadio,[1.45,-5.71,1.8],relayBoxPart,[1,-5.15,1.5],0x302b23);
+relayLead(relayRadio,[1.45,-5.71,1.8],relayBoxPart,[1,-4.95,1.5],0x302b23);
 function updateRelayLeads(){if(Math.abs(sep-lastRelayWireSep)<.0005)return;relayRoot.updateMatrixWorld(true);relayHarness.updateMatrixWorld(true);for(const l of relayLeads){const a=relayHarness.worldToLocal(l.a.obj.localToWorld(new T.Vector3(...l.ap))),b=relayHarness.worldToLocal(l.b.obj.localToWorld(new T.Vector3(...l.bp))),v=b.clone().sub(a),p1=a.clone().addScaledVector(v,.3),p2=a.clone().addScaledVector(v,.7);p1.y-=l.sag;p2.y-=l.sag;p1.z+=.24;p2.z+=.24;const geo=new T.TubeGeometry(new T.CatmullRomCurve3([a,p1,p2,b]),24,.022,8);l.mesh.geometry.dispose();l.mesh.geometry=geo;}lastRelayWireSep=sep;}
 
 /* USB console transceiver: representative footprints and wiring, not a circuit design. */
@@ -424,7 +407,7 @@ const cpEsp=consoleBoard('ESP32-WROOM-32',2.4,3.8,-3,0,0x224653,'USB serial cont
 });
 const cpRadio=consoleBoard('SX1262 LoRa radio',2.5,2,0,1.45,0x28643d,'915–918 MHz console LoRa module; 21 dBm maximum transmit power requirement. Representative shield, SPI headers and SMA RF connector. Module variant and supply/logic compatibility remain unconfirmed.',1.4,1.1,(g,x,y)=>{g.add(box(1.6,1.3,.18,metal(),x,y,.74),text('SX1262',1.4,.23,x,y,.85,'#253d46',85),cylZ(.16,.5,gold(),x+.8,y+.7,.88),ring(.17,.025,metal(),x+.8,y+.7,1.15));for(const sx of [-1,1])relayHeader(g,x+sx,y-.6,6,.23,.64)});
 const cpRtcObj=rtcBoard(2.5,1.6,0,-1.35,.55);mov(cpRtcObj,3.7,-1.1,1.4);
-const cpRtc=consolePart('DS3231 RTC','Electronics','DS3231 breakout with backup-cell holder and VCC / GND / SDA / SCL header. Representative 3.3 V I²C connection; selected breakout and backup-cell circuit require confirmation.',cpRtcObj,[0,-1.35,1.1]);
+const cpRtc=consolePart('DS3231 RTC','Electronics','DS3231 AT24C32 breakout with EEPROM, backup-cell holder and VCC / GND / SDA / SCL header. Representative 3.3 V I²C connection; selected breakout and backup-cell circuit require confirmation.',cpRtcObj,[0,-1.35,1.1]);
 const consoleBuzzer=new T.Group();consoleBuzzer.add(cylZ(.64,.7,blk(),2,-.5,.98),cylZ(.17,.02,mat(0x050607),2,-.5,1.345),ring(.59,.03,metal(),2,-.5,1.34),text('5 V',.65,.18,2,-.9,1.35),box(1.2,.3,.1,mat(0x28643d),2,-1.55,.55));ic(consoleBuzzer,2,-1.55,.72,.22,.18,3);smd(consoleBuzzer,2.4,-1.55,.7);
 for(const x of [1.6,2.4])consoleBuzzer.add(screw(x,-1.7,.65,.08));mov(consoleBuzzer,4,-.6,2);
 const cpBuzzer=consolePart('5 V active buzzer','Electronics','Active sounder with representative transistor driver, resistor and mounting tabs. USB 5 V powers the buzzer; ESP32 drives its control input through the conceptual driver. This is not a verified electrical schematic.',consoleBuzzer,[2,-.5,1.4]);
@@ -432,7 +415,7 @@ const usb=new T.Group();usb.add(box(.68,.35,.3,blk(),-3,-2.3,.73),wire([[-3,-2.4
 const cpUsb=consolePart('USB cable','Power / data','Representative controller USB plug, flexible cable, strain relief and USB-A laptop connector. Supplies 5 V and bidirectional serial data; cable and connector variants are conceptual.',usb,[-7,-1.4,.6]);
 const whip=new T.Group();whip.add(mastTube(.85,.3,6,-2,.7,blk()),mastTube(.58,.3,6,-1.75,.7),mastTube(.09,8,6,2.4,.7,blk()),mastTube(.16,.65,6,-1.2,.7,blk()),mastTube(.12,.7,6,1,.7,blk()));
 whip.add(box(3,.12,3,metal(),6,-2.2,.7),text('3 dBi · MAGNETIC BASE',3.6,.25,6,-2.65,1.1,'#536b76',65));
-const cpWhip=consolePart('3 dBi magnetic-mount whip','Radio','Representative 3 dBi whip on a magnetic base and conceptual steel mounting plate. Feedline routes to the SX1262 SMA connector. Antenna SKU, RF matching and cable length remain unresolved.',whip,[6,3.3,.85]);
+const cpWhip=consolePart('3 dBi magnetic-mount whip','Radio','Representative 3 dBi whip on a magnetic base and conceptual steel mounting plate. Feedline routes to the SX1262 SMA connector. The sheet cost note references a spare 2 dBi whip; it does not establish the named 3 dBi magnetic base. SKU, RF matching and cable length remain unresolved.',whip,[6,3.3,.85]);
 function consoleLead(a,ap,b,bp,color,sag=.15){const mesh=new T.Mesh(new T.BufferGeometry(),mat(color));mesh.userData.part=a;consoleHarness.add(mesh);consolePick.push(mesh);consoleLeads.push({a,ap,b,bp,mesh,sag})}
 for(let i=0;i<7;i++)consoleLead(cpEsp,[-2,-1.3+i*.23,.92],cpRadio,[1,.85+(i%6)*.23,.92],[0xd2ad42,0x528bc7,0x68a477,0x9a78bd,0xd88654,0x8ab8bd,0xd8c078][i],.12+i*.03);
 consoleLead(cpEsp,[-4,-.38,.92],cpRadio,[-1,.85,.92],0xd35343);
@@ -452,30 +435,22 @@ function updateConsoleLeads(){if(Math.abs(sep-lastConsoleWireSep)<.0005)return;c
 const modelSources={
  'ESP32-C3 SuperMini':{status:'Model found',kind:'found',detail:'Published SuperMini CAD/reference models exist. Variant and dimensions still require checking. This viewer uses rebuilt geometry, not a downloaded asset.',links:[['SuperMini STEP model listing','https://craftedtechengineering.com/product.html?id=3d-cad-model-esp32-c3-supermini-development-board-risc-v-wi-fi-ble-standard-step-file'],['SuperMini + shield (GLB/OBJ/Blender, CC-BY-SA)','https://blendswap.com/blend/32508']]},
  'SX1262 LoRa radio':{status:'Variant available',kind:'candidate',detail:'Seeed publishes a Wio-SX1262 3D file. It is a specific board variant, not confirmation of the unspecified SX1262 module in the paper.',links:[['Seeed Wio-SX1262 CAD resources','https://wiki.seeedstudio.com/xiao_esp32s3_%26_wio_SX1262_kit_for_meshtastic/']]},
- 'SW-420 vibration sensor':{status:'Unverified listing',kind:'missing',detail:'An SW420 model listing was found on Tripo, but its file, accuracy and download availability could not be verified. No verified CAD model of the complete common SW-420 / LM393 module was located. Seeed’s Eagle PCB files are not a complete 3D assembly. Custom geometry is used here.',links:[['SW420 listing (unverified)','https://studio.tripo3d.ai/3d-model/sw420-vibration-sensor-419c7eeb-e45e-4459-95cc-25cf9f45c902'],['SW-420 manufacturer resources (PCB files)','https://wiki.seeedstudio.com/Grove-Vibration_Sensor_SW-420/']]},
- 'LiFePO4 power-path charger':{status:'Not found',kind:'missing',detail:'No verified complete TP5000 charger-board 3D model located. A TP5000-based charger case is not the board itself. This board remains a custom representative model.',links:[]},
  '1S LiFePO4 BMS':{status:'Not found',kind:'missing',detail:'No verified whole-board model for the specified single-cell 1S LiFePO4 BMS located. The proposal supplies no manufacturer or board number; an IC-package model is not a match.',links:[]},
  'IFR18650 LiFePO4 backup cell':{status:'Generic model',kind:'candidate',detail:'18650/LiFePO4 shape models exist, but the proposal does not select a cell brand. Treat the sleeve and terminal style here as representative.',links:[['18650 / LiFePO4 cell model library','https://www.3dcontentcentral.com/download-model.aspx?catalogid=171&id=1350575']]},
  'RGB status indicator':{status:'Generic model',kind:'candidate',detail:'KiCad publishes a 5 mm four-lead RGB LED STEP model. The proposal does not identify a LED package. Viewer lens, bezel and leads are representative.',links:[['KiCad RGB LED STEP','https://github.com/KiCad/kicad-packages3D/blob/master/LED_THT.3dshapes/LED_D5.0mm-4_RGB.step']]},
  'Low-battery indicator':{status:'Generic model',kind:'candidate',detail:'KiCad publishes generic through-hole LED models; exact red LED package and bezel remain unspecified.',links:[['KiCad 3 mm LED STEP','https://github.com/KiCad/kicad-packages3D/blob/master/LED_THT.3dshapes/LED_D3.0mm.step']]},
  'Low-gain helical antenna':{status:'Candidate model',kind:'candidate',detail:'Taoglas HA.31.A has manufacturer CAD and is a 915 MHz low-gain helical candidate. Its shape and mounting differ from the illustrative coil shown here; it is not a selected antenna.',links:[['Taoglas HA.31.A and 3D model','https://www.taoglas.com/product/ha-31-915mhz-helical-monopole-antenna/']]},
  'TRAPPED flip guard':{status:'Generic model',kind:'candidate',detail:'Published flip-up covers exist. The reference is a generic PC-button cover, not a confirmed fit or rated guard for the specified waterproof switch.',links:[['Published flip-up button cover STL','https://cults3d.com/en/3d-model/tool/square-flip-up-button-cover']]},
- 'Clear hinged button cover':{status:'Custom design',kind:'custom',detail:'This common clear cover is added for the requested protected controls. No exact KALASAG cover model is specified in the proposal.',links:[]},
  'Wall mounting plate & anchors':{status:'Custom design',kind:'custom',detail:'Mounting plate and anchor arrangement are custom to this concept, not a selected product CAD model.',links:[]},
  'Internal wiring harness':{status:'Custom layout',kind:'custom',detail:'Wiring routes are drawn for the concept; no imported or electrically validated harness model.',links:[]},
  '5 V cable entry':{status:'Unspecified part',kind:'custom',detail:'Concept cable gland and adapter lead. Exact fitting and adapter part numbers are not provided in the proposal.',links:[]}
 };
-for(const name of ['SW-420 vibration sensor','LiFePO4 power-path charger','1S LiFePO4 BMS']){modelSources[name].status='Custom model';modelSources[name].detail='No suitable public Tinkercad model verified. A custom model follows common hardware layouts; the exact purchased board revision is still unspecified. You can replace it with an OBJ or STL.';}
-modelSources['LiFePO4 power-path charger']={status:'Custom board',kind:'custom',detail:'Custom BQ25185-based power-path concept, not an exact commercial breakout. IC CAD is available from TI; whole-board geometry is representative.',links:[['TI BQ25185 specifications and IC CAD','https://www.ti.com/product/BQ25185']]};
-for(const name of ['MCP23017 I/O expander','3.3 V power distribution','3.3 V buck-boost regulator'])modelSources[name]={status:'Custom board',kind:'custom',detail:'Added board concept; no exact purchased module or verified whole-board CAD selected. Replace with the supplier model when selected.',links:[]};
-modelSources['MCP23017 I/O expander'].links=[['Microchip MCP23017','https://www.microchip.com/en-us/product/mcp23017']];
-modelSources['3.3 V buck-boost regulator'].links=[['TI TPS63070','https://www.ti.com/product/TPS63070']];
-for(const p of relayParts)p.source={status:'Concept model',kind:'custom',detail:'Proposal and component-sheet requirements; representative geometry until supplier SKUs and fit are confirmed.',links:[['Component sheet','https://docs.google.com/spreadsheets/d/1QLaJ-uK42XSZoBPESpl_FkiHE4a3wLdfT5JuzkQpVLM/edit?gid=0']]};
 const switchSource={status:'Candidate model',kind:'candidate',detail:'IP67 panel-button CAD exists (for example Bulgin MAV0120). The proposal gives colors and waterproof rating but no part number. These sources do not prove an exact match for the three buttons shown.',links:[['Bulgin IP67 button and CAD listing','https://www.bulgin.com/pdf/pdf.php?sku=MAV0120%2F3D'],['NKK IP-rated button CAD catalog','https://www.nkkswitches.com/products/ip-rated/']]};
 for(const name of ['SAFE sealed pushbutton','NEED HELP sealed pushbutton','TRAPPED sealed pushbutton'])modelSources[name]=switchSource;
 const enclosureSource={status:'Candidate model',kind:'candidate',detail:'Manufacturer STEP models exist for IP65 ABS enclosures, for example Haewa 2365. The KALASAG cutouts, recessed face, dimensions and mounting layout here are custom and not selected product CAD.',links:[['Haewa ABS 2365 STEP resources','https://www.haewa.com/products/enclosures/small-enclosures/small-enclosures-detail/details/2365-0808-05-00']]};
 for(const name of ['ABS front cover & recessed panel','Fixed rear enclosure & gasket'])modelSources[name]=enclosureSource;
-function sourceInfo(p){const s=p.source||modelSources[p.name];if(!s)return;const panel=document.createElement('details');panel.className='source-info';const summary=document.createElement('summary');summary.textContent='Model source';panel.append(summary);const badge=document.createElement('b');badge.className='badge '+s.kind;badge.textContent='3D source: '+s.status;const detail=document.createElement('p');detail.textContent=s.detail;panel.append(badge,detail);s.links.forEach(([label,url])=>{const a=document.createElement('a');a.textContent=label+' ↗';a.href=url;a.target='_blank';a.rel='noopener noreferrer';panel.append(a)});info.append(panel)}
+const componentSheet='https://docs.google.com/spreadsheets/d/1QLaJ-uK42XSZoBPESpl_FkiHE4a3wLdfT5JuzkQpVLM/edit?gid=0';
+for(const p of [...parts,...relayParts,...consoleParts])p.source={status:'BOM concept',kind:'custom',detail:'Component selection follows the authoritative Hardware BOM snapshot (2026-10-03). Geometry is representative; sheet conflicts and circuit/fit questions remain documented in the audit.',links:[['Authoritative component sheet',componentSheet],['Local BOM transcription','references/hardware-bom.md'],['Component audit','references/component-model-audit.md']]};
 
 // Replaceable, editable component bodies. Attachment coordinates remain with each part.
 const byName=name=>parts.find(p=>p.name===name);
@@ -501,44 +476,13 @@ function clearExtra(e){if(e.extra){e.body.remove(e.extra);e.extra.traverse(o=>{i
 function setStyle(p,style){const e=p.edit;if(!e)return;e.style=style;clearExtra(e);e.original.visible=style!=='imported';if(e.imported)e.imported.visible=style==='imported';
  if(style==='headers'){const extra=new T.Group(),s=e.size;for(const side of [-1,1])for(let i=0;i<8;i++){extra.add(box(.18,.22,.25,blk(),side*(s.x/2-.16),(i-3.5)*s.y/8,s.z/2+.1),box(.05,.05,.65,gold(),side*(s.x/2-.16),(i-3.5)*s.y/8,s.z/2+.4))}e.extra=extra;e.body.add(extra)}
  if(style==='light')setFinish(p,'#c9cbd0');if(style==='graphite')setFinish(p,'#35414a');
- if(style==='32700'||style==='pack'||style==='dual'){e.original.visible=false;const extra=new T.Group();const w=style==='dual'?7.5:style==='pack'?8.5:7.4,h=style==='dual'?4.05:style==='pack'?4.4:3.45,d=style==='dual'?2.1:style==='pack'?3.6:3.45;
- if(style==='dual'){extra.add(box(7.5,4.05,.18,blk(),0,0,-.93));for(const y of [-.97,.97]){const cell=new T.Mesh(new T.CylinderGeometry(.9,.9,6.5,96),mat(0x278b80));cell.rotation.z=Math.PI/2;cell.position.y=y;extra.add(cell);for(const x of [-3.3,3.3]){const cap=new T.Mesh(new T.CylinderGeometry(.84,.84,.07,64),metal());cap.rotation.z=Math.PI/2;cap.position.set(x,y,0);extra.add(cap)}extra.add(text('LiFePO4 · 1500 mAh',5.4,.3,0,y,.91,'#eff9ee',75))}extra.add(text('1S2P · 3.2 V · 3 Ah',5.8,.22,0,0,1.01,'#eff9ee',68))}
- else if(style==='pack'){extra.add(box(w,h,d,mat(0x277a85)));extra.add(text('LiFePO4  3.2 V  8 Ah',7.2,.7,0,0,d/2+.01,'#eff9ee',76))}
- else{const cell=new T.Mesh(new T.CylinderGeometry(1.6,1.6,7,96),mat(0x278b80));cell.rotation.z=Math.PI/2;extra.add(cell);for(const x of [-3.5,3.5]){const cap=new T.Mesh(new T.CylinderGeometry(1.52,1.52,.08,64),metal());cap.rotation.z=Math.PI/2;cap.position.x=x;extra.add(cap)}extra.add(text('IFR32700  LiFePO4  6 Ah',5.8,.6,0,0,1.62,'#eff9ee',74))}
- // Normalize alternative body to original dimensions before user edits.
- extra.scale.set(e.size.x/w,e.size.y/h,e.size.z/d);e.extra=extra;e.body.add(extra);
- setDimensions(p,[w*10,h*10,d*10]);}
  refreshPick();wireDirty=true;settings.set(p.name,true);updateFit(p)}
 function restorePart(p){const e=p.edit;clearExtra(e);if(e.imported){e.body.remove(e.imported);e.imported=null}e.style='original';e.original.visible=true;e.body.scale.set(1,1,1);if(e.color)e.original.traverse(o=>{if(o.userData.originalColor)o.material.color.copy(o.userData.originalColor)});e.color=null;wireDirty=true;settings.delete(p.name);refreshPick();showInfo(p)}
 for(const p of editable)p.edit.original.traverse(o=>{if(o.isMesh&&o.material.color)o.userData.originalColor=o.material.color.clone()});
 function updateFit(p){const out=document.querySelector('#fit-note');if(!out||!p.edit)return;const d=dimensions(p);out.textContent=p.cat==='Electronics'||p.cat==='Power'?(d.x>108||d.y>108||d.z>26?'Larger than the original case interior. Resize the case to suit.':'Check clearances after changing dimensions.'):'Dimensions update the selected part.'}
-const shortInfo={
- 'ABS front cover & recessed panel':'Rounded ABS face with recessed controls.',
- 'Fixed rear enclosure & gasket':'Wall-fixed rear case and perimeter seal.',
- 'Clear hinged button cover':'Lift to access the three buttons.',
- 'TRAPPED flip guard':'Lift before pressing TRAPPED.',
- 'ESP32-C3 SuperMini':'Reads inputs and controls the radio.',
- 'SX1262 LoRa radio':'Sends alerts and receives acknowledgments.',
- 'SW-420 vibration sensor':'Detects local movement and vibration.',
- 'LiFePO4 power-path charger':'5 V input; separate system and protected battery connections.',
- '1S LiFePO4 BMS':'Protects the battery from electrical faults.',
- 'IFR18650 LiFePO4 backup cell':'2 × 1500 mAh cells in parallel: 1S2P · 3.2 V · 3000 mAh.',
- 'MCP23017 I/O expander':'Separate button, vibration and LED pins; interrupt wakes the ESP32.',
- '3.3 V power distribution':'Individual terminals for each part on shared power and ground rails.',
- '3.3 V buck-boost regulator':'Regulates the charger or battery supply to 3.3 V.',
- 'Low-gain helical antenna':'Internal LoRa antenna.',
- 'RGB status indicator':'Shows alert progress.',
- 'Low-battery indicator':'Shows a low-battery warning.',
- 'SAFE sealed pushbutton':'Hold for 5 seconds: SAFE.',
- 'NEED HELP sealed pushbutton':'Hold for 5 seconds: NEED HELP.',
- 'TRAPPED sealed pushbutton':'Lift guard; hold for 5 seconds: TRAPPED.',
- 'Wall mounting plate & anchors':'Secures the enclosure to the wall.',
- '5 V cable entry':'Sealed incoming adapter lead.',
- 'Internal wiring harness':'Connected leads follow the moving parts.'
-};
 function editInfo(p){if(!p.edit)return;const editor=document.createElement('div');editor.className='part-editor';
  const label=document.createElement('label');label.textContent='Appearance';const chooser=document.createElement('select');
- const opts=[['original','Original']];if(p.cat==='Electronics'&&p.name!=='Low-gain helical antenna')opts.push(['headers','With pin headers']);if(p.shell)opts.push(['graphite','Graphite ABS'],['light','Light ABS']);if(p.cat==='Power'&&p.name.includes('cell'))opts.push(['dual','1S2P pack · 3 Ah'],['32700','32700 cell · 6 Ah'],['pack','Single-cell pack · 8 Ah']);if(p.edit.imported)opts.push(['imported','Imported model']);
+ const opts=[['original','Original']];if(p.cat==='Electronics'&&p.name!=='Low-gain helical antenna')opts.push(['headers','With pin headers']);if(p.shell)opts.push(['graphite','Graphite ABS'],['light','Light ABS']);if(p.edit.imported)opts.push(['imported','Imported model']);
  opts.forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;chooser.append(o)});chooser.value=p.edit.style;chooser.onchange=()=>{setStyle(p,chooser.value);showInfo(p)};label.append(chooser);editor.append(label);
  const dims=document.createElement('div');dims.className='dimensions';const values=dimensions(p),inputs=[];
  ['Width','Height','Depth'].forEach((name,i)=>{const l=document.createElement('label');l.textContent=name+' (mm)';const input=document.createElement('input');input.type='number';input.min='1';input.max='1000';input.step='0.1';input.value=values.getComponent(i).toFixed(1);input.oninput=()=>setDimensions(p,inputs.map(x=>x.value));inputs.push(input);l.append(input);dims.append(l)});editor.append(dims);
@@ -557,50 +501,38 @@ function lead(a,ap,b,bp,color,sag=.5){const mesh=new T.Mesh(new T.BufferGeometry
 // Proposed pin allocation: independent signal nets, shared supplies via a labeled bus.
 const C3={};['0','1','2','3','4','3V3','GND','5V'].forEach((n,i)=>C3[n]=[-4.49,.64+i*.254,.61]);['21','20','10','9','8','7','6','5'].forEach((n,i)=>C3[n]=[-2.91,.64+i*.254,.61]);
 const R={};['VCC','GND','NSS','SCK','MISO','MOSI','BUSY'].forEach((n,i)=>R[n]=[-1.75,.72+i*.254,.61]);R.RESET=[.56,.72,.61];R.DIO1=[.56,.974,.61];
-const IO={SDA:[-2.18,-.15,.64],SCL:[-2.18,-.38,.64],INT:[-2.18,-.61,.64],VCC:[-2.18,-.84,.64],GND:[-2.18,-1.07,.64]};for(let i=0;i<8;i++){IO['PA'+i]=[-4.6+i*.254,-1.15,.63];IO['PB'+i]=[-4.6+i*.254,-.15,.63];}
-const bus=(rail,i)=>[-1.45+i*.254,rail==='+'?-.25:-1.05,.64];
 const signalPins=[];
 function signal(gpio,to,terminal,color){signalPins.push(String(gpio));lead('ESP32-C3 SuperMini',C3[gpio],to,terminal,color,.2)}
 for(const [gpio,n,color] of [[4,'NSS',0xe1ae32],[5,'SCK',0x5d8cca],[6,'MISO',0x5ba56b],[7,'MOSI',0xa26dd4],[1,'BUSY',0xe5c87c],[0,'RESET',0xd47b45],[10,'DIO1',0x8dbfbe]])signal(gpio,'SX1262 LoRa radio',R[n],color);
-signal(20,'MCP23017 I/O expander',IO.SDA,0x8b73be);signal(21,'MCP23017 I/O expander',IO.SCL,0x4c8dbe);signal(3,'MCP23017 I/O expander',IO.INT,0xd4bc4f);
-lead('3.3 V power distribution',bus('+',0),'ESP32-C3 SuperMini',C3['3V3'],0xc3422c);
-lead('3.3 V power distribution',bus('-',0),'ESP32-C3 SuperMini',C3.GND,0x292d34);
-for(const [name,power,ground,i] of [['SX1262 LoRa radio',R.VCC,R.GND,1],['MCP23017 I/O expander',IO.VCC,IO.GND,2],['SW-420 vibration sensor',[1.28,1.85,.85],[1.28,1.6,.85],3]]){lead('3.3 V power distribution',bus('+',i),name,power,0xc3422c);lead('3.3 V power distribution',bus('-',i),name,ground,0x292d34)}
 const nodeRtcPins={VCC:[-.952,3.466,.76],GND:[-.336,3.466,.76],SDA:[.28,3.466,.76],SCL:[.896,3.466,.76]};
-lead('3.3 V power distribution',bus('+',6),'DS3231 RTC module',nodeRtcPins.VCC,0xc3422c);
-lead('3.3 V power distribution',bus('-',6),'DS3231 RTC module',nodeRtcPins.GND,0x292d34);
-lead('MCP23017 I/O expander',IO.SDA,'DS3231 RTC module',nodeRtcPins.SDA,0x8b73be,.15);
-lead('MCP23017 I/O expander',IO.SCL,'DS3231 RTC module',nodeRtcPins.SCL,0x4c8dbe,.15);
-lead('SW-420 vibration sensor',[1.28,1.35,.85],'MCP23017 I/O expander',IO.PA3,0x7daa50);
-for(const [i,name,x] of [[0,'SAFE sealed pushbutton',-3.2],[1,'NEED HELP sealed pushbutton',0],[2,'TRAPPED sealed pushbutton',3.2]]){lead(name,[x+.2,-.65,1.67],'MCP23017 I/O expander',IO['PA'+i],0xb8a541,.8);lead(name,[x-.2,-.65,1.67],'3.3 V power distribution',bus('-',4+i),0x292d34,.8);}
-for(const [i,x,col] of [[0,-.77,0xcb4a41],[1,-.61,0x4caa68],[2,-.53,0x4d80cb]])lead('RGB status indicator',[x,2.6,2.4],'MCP23017 I/O expander',IO['PB'+i],col,.6);
-lead('RGB status indicator',[-.69,2.6,2.4],'3.3 V power distribution',bus('+',4),0xc3422c,.7);
-lead('Low-battery indicator',[.58,2.6,2.4],'MCP23017 I/O expander',IO.PB3,0xc3422c,.6);
-lead('Low-battery indicator',[.72,2.6,2.4],'3.3 V power distribution',bus('+',5),0xc3422c,.7);
-// B+ / B- are battery side; P+ / P- are protected charger/load side.
+for(const [name,pins] of [['DS3231 RTC module',nodeRtcPins],['ADXL345 GY-291 accelerometer',accelPins]]){
+ signal(20,name,pins.SDA,0x8b73be);signal(21,name,pins.SCL,0x4c8dbe);
+ lead('ESP32-C3 SuperMini',C3['3V3'],name,pins.VCC,0xc3422c);lead('ESP32-C3 SuperMini',C3.GND,name,pins.GND,0x292d34);
+}
+lead('ESP32-C3 SuperMini',C3['3V3'],'SX1262 LoRa radio',R.VCC,0xc3422c);
+lead('ESP32-C3 SuperMini',C3.GND,'SX1262 LoRa radio',R.GND,0x292d34);
+// BOM does not specify a regulated load rail, power path, or sufficient GPIO allocation.
+// Do not fabricate SYS terminals or reuse occupied GPIOs for buttons and LEDs.
 lead('IFR18650 LiFePO4 backup cell',[1.3,-3.385,1.1],'1S LiFePO4 BMS',[2.55,-4.63,.61],0xc3422c);
-lead('IFR18650 LiFePO4 backup cell',[-5.32,-3.385,1.1],'1S LiFePO4 BMS',[2.55,-4.27,.61],0x292d34,.9);
-lead('1S LiFePO4 BMS',[4.25,-4.63,.61],'LiFePO4 power-path charger',[4.5,-1.05,.61],0xc3422c);
-lead('1S LiFePO4 BMS',[4.25,-4.27,.61],'LiFePO4 power-path charger',[4.5,-.75,.61],0x292d34);
-lead('LiFePO4 power-path charger',[4.5,-.45,.61],'3.3 V buck-boost regulator',[4.42,-2.6,.63],0xc3422c);
-lead('LiFePO4 power-path charger',[2.4,-1.05,.61],'3.3 V buck-boost regulator',[4.42,-2.1,.63],0x292d34);
-lead('3.3 V buck-boost regulator',[2.48,-2.6,.63],'3.3 V power distribution',bus('+',7),0xc3422c);
-lead('3.3 V buck-boost regulator',[2.48,-2.1,.63],'3.3 V power distribution',bus('-',7),0x292d34);
-lead('5 V cable entry',[4.60,-5.85,1.1],'LiFePO4 power-path charger',[2.4,-.75,.61],0xc3422c);
-lead('5 V cable entry',[4.70,-5.85,1.1],'LiFePO4 power-path charger',[2.4,-.45,.61],0x292d34);
+lead('IFR18650 LiFePO4 backup cell',[-5.2,-3.385,1.1],'1S LiFePO4 BMS',[2.55,-4.27,.61],0x292d34,.9);
+lead('1S LiFePO4 BMS',[4.25,-4.63,.61],'TP5000 LiFePO4 charger',[4.5,-1.05,.61],0xc3422c);
+lead('1S LiFePO4 BMS',[4.25,-4.27,.61],'TP5000 LiFePO4 charger',[4.5,-.75,.61],0x292d34);
+lead('5 V wall adapter',[8,-9.15,.5],'5 V cable entry',[4.35,-10,-.5],0x292f34);
+lead('5 V cable entry',[4.60,-5.85,1.1],'TP5000 LiFePO4 charger',[2.4,-.75,.61],0xc3422c);
+lead('5 V cable entry',[4.70,-5.85,1.1],'TP5000 LiFePO4 charger',[2.4,-.45,.61],0x292d34);
 lead('SX1262 LoRa radio',[.26,2.29,.73],'Low-gain helical antenna',[5,.4,1.15],0x393127,-.55);
 
 function updateLeads(force=false){if(!force&&!wireDirty&&Math.abs(sep-lastWireSep)<.0005)return;root.updateMatrixWorld(true);wiring.updateMatrixWorld(true);for(const l of leads){const a=wiring.worldToLocal(attachPoint(l.a,l.ap)),b=wiring.worldToLocal(attachPoint(l.b,l.bp)),v=b.clone().sub(a);const p1=a.clone().addScaledVector(v,.3),p2=a.clone().addScaledVector(v,.7);p1.y-=l.sag;p2.y-=l.sag;p1.z+=.35;p2.z+=.35;const geo=new T.TubeGeometry(new T.CatmullRomCurve3([a,p1,p2,b]),24,.035,8);l.mesh.geometry.dispose();l.mesh.geometry=geo;}wireDirty=false;lastWireSep=sep;}
 function exportSetup(){saveActiveView();return {version:2,activeNode,views:{distress:{...nodeRegistry.distress.view},relay:{...nodeRegistry.relay.view}},nodes:{distress:{parts:editable.map(p=>({name:p.name,style:p.edit.style,mm:dimensions(p).toArray(),color:p.edit.color,vertices:p.edit.imported?Array.from(p.edit.imported.geometry.attributes.position.array):null}))}}}}
-function loadSetup(data){const legacy=data.version===1,savedParts=legacy?data.parts:data.version===2?data.nodes?.distress?.parts:null;if(!Array.isArray(savedParts)||savedParts.length>30)throw Error('Invalid setup file');for(const item of savedParts){const p=byName(item.name);if(!p?.edit)continue;if(!Array.isArray(item.mm)||item.mm.length!==3||!item.mm.every(v=>Number.isFinite(v)&&v>=1&&v<=1000))throw Error('Invalid dimensions');if(!['original','headers','light','graphite','dual','32700','pack','imported'].includes(item.style))throw Error('Invalid appearance');if(item.color&&!/^#[a-f\d]{6}$/i.test(item.color))throw Error('Invalid color');if(item.vertices){const check=meshFromVertices(item.vertices);check.geometry.dispose();check.material.dispose()}}
+function loadSetup(data){const legacy=data.version===1,savedParts=legacy?data.parts:data.version===2?data.nodes?.distress?.parts:null;if(!Array.isArray(savedParts)||savedParts.length>30)throw Error('Invalid setup file');for(const item of savedParts){const p=byName(item.name);if(!p?.edit)continue;if(!Array.isArray(item.mm)||item.mm.length!==3||!item.mm.every(v=>Number.isFinite(v)&&v>=1&&v<=1000))throw Error('Invalid dimensions');if(!['original','headers','light','graphite','imported'].includes(item.style))throw Error('Invalid appearance');if(item.color&&!/^#[a-f\d]{6}$/i.test(item.color))throw Error('Invalid color');if(item.vertices){const check=meshFromVertices(item.vertices);check.geometry.dispose();check.material.dispose()}}
  for(const item of savedParts){const p=byName(item.name);if(!p?.edit)continue;restorePart(p);if(item.vertices)replaceModel(p,meshFromVertices(item.vertices));else setStyle(p,item.style);setDimensions(p,item.mm);if(item.color)setFinish(p,item.color)}if(!legacy){for(const id of ['distress','relay']){const v=data.views?.[id];if(v&&['th','ph','r'].every(k=>Number.isFinite(v[k])))nodeRegistry[id].view={th:v.th,ph:clamp(v.ph,.35,2.65),r:clamp(v.r,10,id==='relay'?240:70),pan:id==='relay'&&Number.isFinite(v.pan)?clamp(v.pan,-34.3,34.3):0,focus:['box','antenna','tower'].includes(v.focus)?v.focus:'box'}}switchNode(['distress','relay','console'].includes(data.activeNode)?data.activeNode:'distress',false)}wireDirty=true;showInfo(sel)}
 function initSetupControls(){const save=document.querySelector('#save-setup'),load=document.querySelector('#load-setup');save.onclick=()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(exportSetup())],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='kalasag-component-setup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};load.onchange=async()=>{try{loadSetup(JSON.parse(await load.files[0].text()))}catch(err){const h=document.querySelector('#info h2');h.textContent='Setup could not load';const p=document.querySelector('#info p');p.textContent=err.message}load.value=''}}
 
 /* UI */
 const info=$('#info'),list=$('#list'),tags=$('#tags');let sel=null,helper=null,activeNode='distress',activeParts=parts,activePick=pick;
 function showInfo(p){info.innerHTML='';const h=document.createElement('h2'),c=document.createElement('div'),d=document.createElement('p');c.className='c';
- if(p){h.textContent=p.name;c.textContent=p.cat;d.textContent=(activeNode==='distress'?shortInfo[p.name]:null)||p.spec}else if(activeNode==='relay'){h.textContent='Mobile LoRa relay tower';c.textContent='4 m tripod · conceptual geometry';d.textContent='Relay ready · 915–918 MHz · 18 dBm maximum transmit power. Select a component or expose the low-mounted field enclosure with X-ray / exploded views. The 3.2 m mast and 8 dBi antenna candidates remain unresolved.'}else if(activeNode==='console'){h.textContent='Console node';c.textContent=consoleView==='dashboard'?'SIMULATION · Incident operations':'USB LoRa transceiver · conceptual';d.textContent=consoleView==='dashboard'?'Test incident data is generated locally. Send a test alert, acknowledge its receipt and dispatch a simulated response. Switch to Hardware to inspect the transceiver.':'Select hardware, expose the case with X-ray or explode the assembly. Dashboard shows simulated incidents; no live devices are connected.'}else{h.textContent='Distress node';c.textContent='Wall-mounted';d.textContent='Select a part to change its size or appearance.'}
- info.append(h,c,d);if(p){if(activeNode==='distress')editInfo(p);sourceInfo(p)}}
+ if(p){h.textContent=p.name;c.textContent=p.cat;d.textContent=p.spec}else if(activeNode==='relay'){h.textContent='Mobile LoRa relay tower';c.textContent='4 m tripod · conceptual geometry';d.textContent='Relay ready · 915–918 MHz · 18 dBm maximum transmit power. Select a component or expose the low-mounted field enclosure with X-ray / exploded views. The 3.2 m mast candidate does not meet the 4 m requirement; the 8 dBi antenna listing conflicts with the 5.8 dBi BOM name.'}else if(activeNode==='console'){h.textContent='Console node';c.textContent=consoleView==='dashboard'?'SIMULATION · Incident operations':'USB LoRa transceiver · conceptual';d.textContent=consoleView==='dashboard'?'Test incident data is generated locally. Send a test alert, acknowledge its receipt and dispatch a simulated response. Switch to Hardware to inspect the transceiver.':'Select hardware, expose the case with X-ray or explode the assembly. Dashboard shows simulated incidents; no live devices are connected.'}else{h.textContent='Distress node';c.textContent='Hardware BOM · 2026-10-03 snapshot';d.textContent='Sheet components are shown with representative geometry. Pack quantity, regulated load supply, GPIO allocation and passive values remain unspecified. Select a part for its BOM details.'}
+ info.append(h,c,d);if(p){if(activeNode==='distress')editInfo(p)}}
 function select(p){sel=(sel===p)?null:p;if(helper){scene.remove(helper);helper=null}
  if(sel){helper=new T.BoxHelper(sel.obj,0xff7a2f);helper.material.depthTest=false;helper.renderOrder=10;scene.add(helper)}
  activeParts.forEach(q=>{q.li?.classList.toggle('sel',q===sel);q.tag?.classList.toggle('sel',q===sel)});showInfo(sel)}
@@ -693,7 +625,7 @@ function loop(now){requestAnimationFrame(loop);const dt=Math.min((now-last)/1000
  root.updateMatrixWorld(true);relayRoot.updateMatrixWorld(true);consoleRoot.updateMatrixWorld(true);if(activeNode==='distress')updateLeads();if(activeNode==='relay')updateRelayLeads();if(activeNode==='console')updateConsoleLeads();
  const W=stage.clientWidth,H=stage.clientHeight;
  activeParts.forEach(p=>{tmp.set(...p.anchor);p.obj.localToWorld(tmp);tmp.project(cam);const v=tmp.z>-1&&tmp.z<1&&Math.abs(tmp.x)<1&&Math.abs(tmp.y)<1;p.tag.style.display=v?'':'none';p.tag.style.transform=`translate(${(tmp.x*.5+.5)*W}px,${(-tmp.y*.5+.5)*H}px)`});
- lidAngle+=(lidTarget-lidAngle)*k;lidPivot.rotation.x=-lidAngle;guardAngle+=(guardTarget-guardAngle)*k;trapPivot.rotation.x=-guardAngle;
+ guardAngle+=(guardTarget-guardAngle)*k;trapPivot.rotation.x=-guardAngle;
  if(helper)helper.update();
  if(activeNode==='distress')ledUpdate(now/1000);if(activeNode!=='console'||consoleView==='hardware')renderer.render(scene,cam)}
 requestAnimationFrame(loop);

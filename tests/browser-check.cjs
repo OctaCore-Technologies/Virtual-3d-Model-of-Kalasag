@@ -14,6 +14,11 @@ const snapshot=async name=>{if(artifactDir)await page.screenshot({path:path.join
 const settle=()=>page.waitForFunction(()=>Math.abs(th-thT)<.02&&Math.abs(ph-phT)<.02&&Math.abs(r-rT)<.05&&cameraTarget.distanceTo(tg)<.08&&Math.abs(sep-sepT)<.005&&Math.abs(xr-xrT)<.005,{},{timeout:45000});
 await page.goto(baseURL+'#relay');await settle();
 await check('relay defaults to enclosure',()=>activeNode==='relay'&&relayFraming==='box'&&Math.abs(cameraTarget.y+9)<.1&&activeParts.length===10);
+await check('coax external plus internal route fits 3 metres',()=>{
+ const outer=coax.children[0].geometry.parameters.path.getLength();
+ const internal=relayLeads.find(l=>l.a===relayRadio&&l.b===relayBoxPart).mesh.geometry.parameters.path.getLength();
+ return (outer+internal)/7<=3;
+});
 await page.getByRole('button',{name:'Antenna',exact:true}).click();await settle();
 await check('antenna focus centers elevated antenna',()=>relayFraming==='antenna'&&Math.abs(cameraTarget.y-17.2)<.15);
 await snapshot('kalasag-antenna');
@@ -54,6 +59,21 @@ await page.getByRole('button',{name:'Reset view',exact:true}).click();await sett
 await check('relay dynamic wiring is preserved',()=>relayLeads.length>10&&relayLeads.every(l=>{const v=new T.Vector3().fromBufferAttribute(l.mesh.geometry.attributes.position,0);relayHarness.localToWorld(v);return v.distanceTo(l.a.obj.localToWorld(new T.Vector3(...l.ap)))<.05}));
 await page.getByRole('tab',{name:'Console Node',exact:true}).click();await page.getByRole('button',{name:'Hardware',exact:true}).click();await page.getByRole('button',{name:'Exploded',exact:true}).click();await settle();await snapshot('kalasag-console-mobile-exploded');
 await page.getByRole('button',{name:'Dashboard',exact:true}).click();assert(!(await page.locator('aside').isVisible()),'Dashboard uses the full workspace');await page.getByRole('button',{name:'Hardware',exact:true}).click();await page.locator('#list button').nth(1).click();await check('dashboard hardware selection opens the 3D view',()=>consoleView==='hardware'&&sel===cpEsp);await page.getByRole('button',{name:'Dashboard',exact:true}).click();await page.getByRole('button',{name:'Send test alert'}).click();await page.waitForTimeout(1700);await snapshot('kalasag-dashboard-mobile');
-await page.getByRole('tab',{name:'Distress Node',exact:true}).click();await settle();await check('distress RTC and preserved power assembly',()=>parts.some(p=>p.name==='DS3231 RTC module')&&parts.some(p=>p.name==='3.3 V buck-boost regulator')&&wall.visible&&root.visible&&!relayRoot.visible&&!consoleRoot.visible);
+await page.getByRole('tab',{name:'Distress Node',exact:true}).click();await settle();await check('distress BOM components and removed additions',()=>{
+ const names=parts.map(p=>p.name);
+ return ['ADXL345 GY-291 accelerometer','TP5000 LiFePO4 charger','5 V wall adapter','1/4 W 1% resistors','Electrolytic supply capacitors','DS3231 RTC module'].every(n=>names.includes(n))&&
+ ['SW-420 vibration sensor','LiFePO4 power-path charger','MCP23017 I/O expander','3.3 V buck-boost regulator','3.3 V power distribution','Clear hinged button cover'].every(n=>!names.includes(n))&&wall.visible&&root.visible&&!relayRoot.visible&&!consoleRoot.visible;
+});
+await check('all components link to sheet authority',()=>[...parts,...relayParts,...consoleParts].every(p=>p.source.links.some(l=>l[1]===componentSheet)));
+await check('battery does not claim pack quantity',()=>byName('IFR18650 LiFePO4 backup cell').spec.includes('does not specify pack quantity')&&batteryYs.length===1);
+await check('all three RTC boards include EEPROM geometry',()=>[nodeRtc,relayRtc.obj,cpRtc.obj].every(g=>{let count=0;g.traverse(o=>{if(o.isMesh&&o.material.map)count++});return count>=6}));
+await page.getByRole('button',{name:'Exploded',exact:true}).click();await settle();
+await check('distress exploded wires remain attached to existing components',()=>leads.every(l=>{
+ if(!parts.includes(l.a)||!parts.includes(l.b))return false;
+ const v=new T.Vector3().fromBufferAttribute(l.mesh.geometry.attributes.position,0);wiring.localToWorld(v);return v.distanceTo(attachPoint(l.a,l.ap))<.06;
+}));
+await snapshot('kalasag-distress-bom-exploded');
+await page.getByRole('button',{name:'X-ray',exact:true}).click();await settle();
+await snapshot('kalasag-distress-bom-xray');
 assert.deepEqual(errors,[]);console.log('PASS no browser JavaScript or console errors');await browser.close();
 })().catch(e=>{console.error(e);process.exitCode=1}).finally(async()=>{if(browser)await browser.close()});
