@@ -219,9 +219,20 @@ const tgGuard=new T.Group();const redGuard=mat(0xb62725,{roughness:.32});tgGuard
 tgGuard.add(text('LIFT',1,.24,0,-.85,.17,'#ffffff',110));
 const hingeTrap=new T.Mesh(new T.CylinderGeometry(.11,.11,1.5,64),metal());hingeTrap.rotation.z=Math.PI/2;hingeTrap.position.set(0,0,.04);tgGuard.add(hingeTrap);
 part('TRAPPED flip guard','Safety cover','Separate opaque red flip guard prevents an accidental TRAPPED press. Lift this guard before pressing TRAPPED.',tgGuard,[0,-.8,.25],trapPivot);
-let guardAngle=0,guardTarget=0;
-$('#lid').hidden=true;
-$('#guard').onclick=()=>{guardTarget=guardTarget?0:1.85;$('#guard').textContent=guardTarget?'Lower TRAPPED guard':'Lift TRAPPED guard'};
+const lidPivot=new T.Group();lidPivot.position.set(0,1.28,3.64);cg.add(lidPivot);
+const lidGroup=new T.Group(),clear=mat(0xc6e5ed,{transparent:true,opacity:.16,roughness:.09,metalness:.05,side:T.DoubleSide,depthWrite:false});
+const glass=ext(rr(10.55,3.95,.3),.085,.12,clear);glass.position.y=-1.96;lidGroup.add(glass);
+const lidFrame=ext(ringS(10.65,4.05,.32,10.42,3.82,.24),.14,.12,mat(0x88969b,{metalness:.65,roughness:.24}));lidFrame.position.y=-1.96;lidGroup.add(lidFrame);
+for(const x of [-3.9,3.9]){const hi=new T.Mesh(new T.CylinderGeometry(.14,.14,1,64),metal());hi.rotation.z=Math.PI/2;hi.position.set(x,0,.08);lidGroup.add(hi)}
+lidGroup.add(box(1.55,.22,.25,mat(0x5b6971),0,-3.97,.2),text('LIFT',1.2,.18,0,-3.98,.335,'#f4f4ee',100));
+// This hinged cover is a custom enclosure feature, sharing its selectable case part.
+lidPivot.add(lidGroup);
+const frontCase=parts.find(p=>p.obj===cg);
+lidGroup.traverse(o=>{if(o.isMesh){o.userData.part=frontCase;o.castShadow=!o.material.transparent;o.receiveShadow=true;pick.push(o)}});
+frontCase.spec+=' Custom case modification: transparent hinged cover, frame and latch over all three buttons; not a separate BOM module.';
+let lidAngle=0,lidTarget=0,guardAngle=0,guardTarget=0;
+$('#lid').onclick=()=>{lidTarget=lidTarget?0:1.9;if(!lidTarget){guardTarget=0;$('#guard').textContent='Lift TRAPPED guard'}$('#lid').textContent=lidTarget?'Close button cover':'Open button cover'};
+$('#guard').onclick=()=>{guardTarget=guardTarget?0:1.85;if(guardTarget){lidTarget=1.9;$('#lid').textContent='Close button cover'}$('#guard').textContent=guardTarget?'Lower TRAPPED guard':'Lift TRAPPED guard'};
 function led(x,y,r,col,emi){const g=new T.Group(),m=mat(col,{emissive:col,emissiveIntensity:emi,roughness:.16});const d=new T.Mesh(new T.SphereGeometry(r,48,24),m);d.scale.z=.7;d.position.set(x,y,3.28);g.add(cylZ(r+.07,.08,metal(),x,y,3.22),d,cylZ(r*.75,.6,blk(),x,y,2.91));for(const a of (r>.2?[-.12,-.04,.04,.12]:[-.07,.07]))g.add(box(.025,.025,.4,metal(),x+a,y,2.4));return{g,m}}
 const rgb=led(-.65,2.6,.27,0xff2a2a,1),low=led(.65,2.6,.15,0x8b1616,.05);
 part('RGB status indicator','Front panel','Proposal status sequence: blinking red while awaiting relay acknowledgment, blinking blue after relay acknowledgment, steady blue after console acknowledgment, green when help is on the way. Animation is a visual demo.',rgb.g,[-.65,2.6,3.5],cover);
@@ -625,7 +636,7 @@ function loop(now){requestAnimationFrame(loop);const dt=Math.min((now-last)/1000
  root.updateMatrixWorld(true);relayRoot.updateMatrixWorld(true);consoleRoot.updateMatrixWorld(true);if(activeNode==='distress')updateLeads();if(activeNode==='relay')updateRelayLeads();if(activeNode==='console')updateConsoleLeads();
  const W=stage.clientWidth,H=stage.clientHeight;
  activeParts.forEach(p=>{tmp.set(...p.anchor);p.obj.localToWorld(tmp);tmp.project(cam);const v=tmp.z>-1&&tmp.z<1&&Math.abs(tmp.x)<1&&Math.abs(tmp.y)<1;p.tag.style.display=v?'':'none';p.tag.style.transform=`translate(${(tmp.x*.5+.5)*W}px,${(-tmp.y*.5+.5)*H}px)`});
- guardAngle+=(guardTarget-guardAngle)*k;trapPivot.rotation.x=-guardAngle;
+ lidAngle+=(lidTarget-lidAngle)*k;lidPivot.rotation.x=-lidAngle;guardAngle+=(guardTarget-guardAngle)*k;trapPivot.rotation.x=-guardAngle;
  if(helper)helper.update();
  if(activeNode==='distress')ledUpdate(now/1000);if(activeNode!=='console'||consoleView==='hardware')renderer.render(scene,cam)}
 requestAnimationFrame(loop);

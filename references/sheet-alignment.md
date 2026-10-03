@@ -15,7 +15,7 @@ Branch: `feat/sheet-aligned-components`. Baseline: `10806ec`. Authority: [Hardwa
 | 23 | Coax routed directly to top gland; nominal centerline length checked against 3 m at the declared relay scale. Purchased connector allowances/slack need verification. |
 | 36 | Representative installed wiring/cable ties; solder, flux, IPA and other process consumables are not installed modules. |
 
-Other named BOM families remain represented. Removed unlisted additions: MCP23017, 3.3 V buck-boost, distribution board, common hinged button cover, relay fuse. Individual TRAPPED guard is retained. Non-BOM battery alternatives are removed from appearance and setup imports.
+Other named BOM families remain represented. Removed unlisted additions: MCP23017, 3.3 V buck-boost, distribution board and relay fuse. The common transparent hinged cover is restored as a custom enclosure modification, sharing the front-case selection; it is not a separate BOM part/module. Individual TRAPPED guard is retained. Non-BOM battery alternatives are removed from appearance and setup imports.
 
 ## Wiring dependencies and unresolved circuit design
 
