@@ -159,7 +159,7 @@ const mat=(c,o={})=>new T.MeshStandardMaterial(Object.assign({color:c,roughness:
 const box=(w,h,d,m,x=0,y=0,z=0)=>{const o=new T.Mesh(new T.BoxGeometry(w,h,d),m);o.position.set(x,y,z);return o};
 const cylZ=(r,h,m,x,y,z,s=64)=>{const o=new T.Mesh(new T.CylinderGeometry(r,r,h,s),m);o.rotation.x=Math.PI/2;o.position.set(x,y,z);return o};
 const wire=(p,c)=>new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(p.map(a=>new T.Vector3(...a))),64,.045,12),mat(c));
-function rr(w,h,r){const s=new T.Shape(),x=-w/2,y=-h/2;s.moveTo(x+r,y);s.lineTo(x+w-r,y);s.quadraticCurveTo(x+w,y,x+w,y+r);s.lineTo(x+w,y+h-r);s.quadraticCurveTo(x+w,y+h,x+w-r,y+h);s.lineTo(x+r,y+h);s.quadraticCurveTo(x,y+h,x,y+h-r);s.lineTo(x,y+r);s.quadraticCurveTo(x,y,x+r,y);return s}
+function rr(w,h,r,cy=0){const s=new T.Shape(),x=-w/2,y=-h/2+cy;s.moveTo(x+r,y);s.lineTo(x+w-r,y);s.quadraticCurveTo(x+w,y,x+w,y+r);s.lineTo(x+w,y+h-r);s.quadraticCurveTo(x+w,y+h,x+w-r,y+h);s.lineTo(x+r,y+h);s.quadraticCurveTo(x,y+h,x,y+h-r);s.lineTo(x,y+r);s.quadraticCurveTo(x,y,x+r,y);return s}
 const ext=(s,d,z,m)=>{const o=new T.Mesh(new T.ExtrudeGeometry(s,{depth:d,bevelEnabled:true,bevelSegments:5,steps:1,bevelSize:Math.min(.055,d/5),bevelThickness:Math.min(.04,d/5),curveSegments:32}),m);o.position.z=z;return o};
 const ringS=(wo,ho,ro,wi,hi,ri)=>{const s=rr(wo,ho,ro);s.holes.push(rr(wi,hi,ri));return s};
 const metal=()=>mat(0xc3c9d0,{metalness:.85,roughness:.3}),gold=()=>mat(0xd9b24a,{metalness:.8,roughness:.35}),blk=()=>mat(0x15181c,{roughness:.5});
@@ -195,28 +195,30 @@ function rtcBoard(w,h,x,y,z){const g=board(w,h,0x286b89,x,y,z);
 // Vertical wall and fixed anchor plate. Rear housing stays attached in exploded view.
 const wall=box(36,26,.5,mat(0xc8c9c5,{roughness:1}),0,1,-1.15);wall.receiveShadow=true;scene.add(wall);
 const floor=box(45,.25,35,mat(0xb9bbb8,{roughness:1}),0,-12.2,8);floor.receiveShadow=true;scene.add(floor);
+// Extend the lower housing by 2.4 model units for three full-size cell holders.
+const lowerHousing=mesh=>{mesh.position.y=-1.2;return mesh};
 const mounting=new T.Group();
-mounting.add(ext(rr(10.5,13.2,.3),.18,-.74,metal()));
-for(const x of [-4.5,4.5])for(const y of [-6.25,6.25]){mounting.add(screw(x,y,-.52,.18),ring(.23,.04,metal(),x,y,-.56))}
+mounting.add(lowerHousing(ext(rr(10.5,15.6,.3),.18,-.74,metal())));
+for(const x of [-4.5,4.5])for(const y of [-8.65,6.25]){mounting.add(screw(x,y,-.52,.18),ring(.23,.04,metal(),x,y,-.56))}
 part('Wall mounting plate & anchors','Installation','Rear bracket fastened to a vertical wall with four anchors. The enclosure locks to this bracket. Mounting dimensions are a concept, to be checked against the selected ABS case.',mounting,[4.5,6.25,-.5]);
 
 const cover=new T.Group();root.add(cover);mov(cover,9,3);
 const sm1=mat(0x353e45,{roughness:.38}),sm2=mat(0x414b53,{roughness:.48});
-const cg=new T.Group(),frontShape=rr(12,12,.65);
+const cg=new T.Group(),frontShape=rr(12,14.4,.65,-1.2);
 for(const x of [-3.2,0,3.2]){const hole=new T.Path();hole.absarc(x,-.65,.64,0,Math.PI*2,true);frontShape.holes.push(hole)}
 for(const [x,y,r] of [[-.65,2.6,.27],[.65,2.6,.15]]){const h=new T.Path();h.absarc(x,y,r,0,Math.PI*2,true);frontShape.holes.push(h)}
 shellMesh(ext(frontShape,.3,2.9,sm1),cg);
-shellMesh(ext(ringS(11.4,11.4,.5,10.9,10.9,.4),.28,2.62,sm1),cg);
+shellMesh(lowerHousing(ext(ringS(11.4,13.8,.5,10.9,13.3,.4),.28,2.62,sm1)),cg);
 // Raised surround keeps the button caps below its rim.
 const surround=ext(ringS(10.45,3.7,.35,9.9,3.15,.25),.48,3.2,mat(0x253039,{roughness:.4}));surround.position.y=-.65;shellMesh(surround,cg);
 cg.add(text('KALASAG',3.35,.5,-3.65,2.7,3.255,'#f1f3ed',105),text('SURVIVOR DISTRESS NODE',4,.28,-3.5,2.1,3.255,'#99a9b2',62),text('SPATIAL ID',2.65,.25,3.7,2.9,3.255,'#99a9b2',66),text('B3 · 304 · EAST',2.65,.38,3.7,2.4,3.255,'#f1f3ed',65));
 cg.add(text('STATUS',1.1,.23,-.65,1.95,3.255,'#cdd5da',66),text('BATTERY',1.1,.23,.65,1.95,3.255,'#cdd5da',66),text('HOLD BUTTON FOR 5 SECONDS',8.9,.32,0,-3.1,3.255,'#ccd5dc',70));
 for(const [x,t] of [[-3.2,'SAFE'],[0,'NEED HELP'],[3.2,'TRAPPED']])cg.add(text(t,2.45,.43,x,-1.97,3.27,'#f1f3ed',76));
-for(const x of [-5.5,5.5])for(const y of [-5.45,5.45])cg.add(screw(x,y,3.26,.14));
+for(const x of [-5.5,5.5])for(const y of [-7.85,5.45])cg.add(screw(x,y,3.26,.14));
 part('ABS front cover & recessed panel','Outer shell','Flame-retardant ABS face with recessed button surrounds, captive screws and Spatial ID. IP65 is the proposal enclosure requirement; ingress protection depends on the real enclosure, seals and fittings.',cg,[5.7,2.7,3.3],cover);
-const base=new T.Group();shellMesh(ext(rr(12,12,.65),.35,-.4,sm2),base);shellMesh(ext(ringS(12,12,.65,11.25,11.25,.45),2.87,0,sm2),base);
-const gasket=ext(ringS(11.6,11.6,.5,11.22,11.22,.42),.08,2.83,blk());base.add(gasket);
-for(const x of [-5.25,5.25])for(const y of [-5.25,5.25])base.add(cylZ(.22,2.4,mat(0x4b565f),x,y,1.1),cylZ(.09,.08,metal(),x,y,2.35));
+const base=new T.Group();shellMesh(lowerHousing(ext(rr(12,14.4,.65),.35,-.4,sm2)),base);shellMesh(lowerHousing(ext(ringS(12,14.4,.65,11.25,13.65,.45),2.87,0,sm2)),base);
+const gasket=lowerHousing(ext(ringS(11.6,14,.5,11.22,13.62,.42),.08,2.83,blk()));base.add(gasket);
+for(const x of [-5.25,5.25])for(const y of [-7.65,5.25])base.add(cylZ(.22,2.4,mat(0x4b565f),x,y,1.1),cylZ(.09,.08,metal(),x,y,2.35));
 part('Fixed rear enclosure & gasket','Outer shell','Wall-fixed flame-retardant ABS tray, screw bosses and perimeter gasket. The back remains attached to the wall when the front is removed for inspection.',base,[-5.85,0,1.4]);
 
 function btn(x,col){const g=new T.Group(),y=-.65;g.add(cylZ(.6,.15,metal(),x,y,3.22),ring(.53,.055,blk(),x,y,3.32),cylZ(.46,.14,mat(col,{roughness:.28}),x,y,3.34),cylZ(.4,.88,metal(),x,y,2.64),cylZ(.58,.1,metal(),x,y,2.6,6),box(.7,.65,.6,blk(),x,y,2.05));
@@ -277,14 +279,14 @@ for(let i=0;i<3;i++)smd(g,1.85+i*.25,2.22,.67,.14,.08);
 mov(g,4.9,2.2,1.7);part('ADXL345 GY-291 accelerometer','Electronics','Sheet row 9: three-axis acceleration, tilt and vibration sensor. Representative GY-291 PCB with ADXL345 IC and eight-pin header; supplier dimensions remain unconfirmed.',g,[2.7,1.7,1.12]);
 
 g=new T.Group();
-const batteryYs=[-3.385];
+const batteryYs=[-2.1,-4.2,-6.3];
 for(let i=0;i<batteryYs.length;i++){const y=batteryYs[i],cell=new T.Mesh(new T.CylinderGeometry(.9,.9,6.5,96),mat(0x268b80,{roughness:.26}));cell.rotation.z=Math.PI/2;cell.position.set(-2,y,1.06);g.add(cell,box(7.15,1.98,.2,blk(),-2,y,.15));
  for(const x of [-5.5,1.5])g.add(box(.25,1.98,1.15,blk(),x,y,.63));
  for(const x of [-5.2,1.2]){const cap=new T.Mesh(new T.CylinderGeometry(.84,.84,.055,96),metal());cap.rotation.z=Math.PI/2;cap.position.set(x,y,1.06);g.add(cap)}
  const nub=new T.Mesh(new T.CylinderGeometry(.3,.3,.12,64),metal());nub.rotation.z=Math.PI/2;nub.position.set(1.3,y,1.06);g.add(nub);
  g.add(text('CELL '+(i+1)+' · LiFePO4 · 1500 mAh',5.6,.26,-2,y,1.971,'#e4f3df',78),text('+',.42,.42,.6,y,1.92,'#fff',100),text('−',.42,.42,-4.65,y,1.92,'#fff',100));
 }
-mov(g,2.6,-1.7,-1.2);part('IFR18650 LiFePO4 backup cell','Power','Sheet row 11: 3.2 V / 1500 mAh IFR18650 cell. One representative cell is displayed; the sheet does not specify pack quantity or topology. No parallel pack or aggregate capacity is assumed.',g,[-2,-3.385,2.05]);
+mov(g,2.6,-1.7,-1.2);part('IFR18650 LiFePO4 backup cells','Power','Three IFR18650 LiFePO4 cells with individual holders. Sheet row 11 specifies 3.2 V / 1500 mAh per cell; the sheet does not specify pack quantity or topology. Pack interconnects and aggregate capacity remain unspecified.',g,[-2,-4.2,2.05]);
 
 
 g=board(2.45,1.65,0x235ea8,3.45,-.72,.53);
@@ -300,9 +302,9 @@ mov(g,3.1,-2.3,1.8);part('1S LiFePO4 BMS','Power','Representative single-cell Li
 
 const wiring=new T.Group();
 part('Internal wiring harness','Assembly','Sheet row 36: representative jumper/hookup wires follow parts in exploded mode. Button/LED GPIO allocation, resistor values and regulated load supply remain unspecified; these connections are intentionally not invented. Solder, flux and IPA are assembly supplies, not installed modules.',wiring,[1.6,0,.6]);
-const gland=new T.Group();const glandBody=new T.Mesh(new T.CylinderGeometry(.25,.25,.55,64),blk());glandBody.position.set(4.65,-6.1,1.1);gland.add(glandBody);
-gland.add(wire([[4.65,-6.32,1.1],[4.65,-7.1,.9],[4.35,-8,.3],[4.35,-10,-.5]],0x292f34));
-part('5 V cable entry','Installation','Concept bottom cable gland and incoming 5 V adapter lead. Sealing hardware must be selected for the enclosure’s intended ingress protection.',gland,[4.65,-6.15,1.1]);
+const gland=new T.Group();const glandBody=new T.Mesh(new T.CylinderGeometry(.25,.25,.55,64),blk());glandBody.position.set(4.65,-8.5,1.1);gland.add(glandBody);
+gland.add(wire([[4.65,-8.72,1.1],[4.65,-9.1,.9],[4.35,-9.6,.3],[4.35,-10,-.5]],0x292f34));
+part('5 V cable entry','Installation','Concept bottom cable gland and incoming 5 V adapter lead. Sealing hardware must be selected for the enclosure’s intended ingress protection.',gland,[4.65,-8.55,1.1]);
 
 const adapter=new T.Group();adapter.add(box(2.5,3.1,1.6,blk(),8,-7.6,.5),box(.16,.6,.12,metal(),7.6,-5.9,.3),box(.16,.6,.12,metal(),8.4,-5.9,.3),text('5 V DC',2,.35,8,-7.6,1.32,'#eeeeee',80));
 mov(adapter,1,-.4,1);part('5 V wall adapter','Power','Sheet row 14: external 5 V wall adapter supplying the TP5000 input. Body, mains prongs and DC lead are illustrative; connector fit is unconfirmed.',adapter,[8,-7.6,1.4]);
@@ -313,7 +315,7 @@ mov(resistors,4,-.3,-1.6);part('1/4 W 1% resistors','Passive components','Sheet 
 const capacitors=new T.Group();
 for(const [x,y] of [[-2.65,3.05],[1.15,3.05]]){capacitors.add(cylZ(.23,.65,mat(0x253c56),x,y,.91),cylZ(.22,.04,metal(),x,y,1.25),box(.3,.025,.01,blk(),x,y,1.275),box(.025,.3,.01,blk(),x,y,1.275));for(const dx of [-.09,.09])capacitors.add(box(.025,.025,.25,metal(),x+dx,y,.49));}
 mov(capacitors,3.6,1.7,.3);part('Electrolytic supply capacitors','Passive components','Sheet row 18: electrolytic supply capacitors placed beside the ESP32 and SX1262. Capacitance, voltage rating and quantity require circuit selection; two representative capacitors are displayed.',capacitors,[1.15,3.05,1.3]);
-cg.add(text('IFR18650 · 3.2 V · 1500 mAh / CELL',8.5,.28,0,4.4,3.255,'#a7bcc2',70));
+cg.add(text('3 × IFR18650 · 3.2 V · 1500 mAh / CELL',8.5,.28,0,4.4,3.255,'#a7bcc2',70));
 
 const nodeRtc=rtcBoard(2.8,1.8,0,4.15,.53);mov(nodeRtc,4.4,2.5,.8);
 const nodeRtcPart=part('DS3231 RTC module','Electronics','Representative DS3231 RTC breakout with backup-cell holder, headers and passive components. Includes AT24C32 EEPROM and shares conceptual I²C with ADXL345: GPIO20 SDA and GPIO21 SCL. Dimensions and backup-cell variant remain conceptual.',nodeRtc,[0,4.15,.95]);
@@ -458,7 +460,7 @@ const modelSources={
  'ESP32-C3 SuperMini':{status:'Model found',kind:'found',detail:'Published SuperMini CAD/reference models exist. Variant and dimensions still require checking. This viewer uses rebuilt geometry, not a downloaded asset.',links:[['SuperMini STEP model listing','https://craftedtechengineering.com/product.html?id=3d-cad-model-esp32-c3-supermini-development-board-risc-v-wi-fi-ble-standard-step-file'],['SuperMini + shield (GLB/OBJ/Blender, CC-BY-SA)','https://blendswap.com/blend/32508']]},
  'SX1262 LoRa radio':{status:'Variant available',kind:'candidate',detail:'Seeed publishes a Wio-SX1262 3D file. It is a specific board variant, not confirmation of the unspecified SX1262 module in the paper.',links:[['Seeed Wio-SX1262 CAD resources','https://wiki.seeedstudio.com/xiao_esp32s3_%26_wio_SX1262_kit_for_meshtastic/']]},
  '1S LiFePO4 BMS':{status:'Not found',kind:'missing',detail:'No verified whole-board model for the specified single-cell 1S LiFePO4 BMS located. The proposal supplies no manufacturer or board number; an IC-package model is not a match.',links:[]},
- 'IFR18650 LiFePO4 backup cell':{status:'Generic model',kind:'candidate',detail:'18650/LiFePO4 shape models exist, but the proposal does not select a cell brand. Treat the sleeve and terminal style here as representative.',links:[['18650 / LiFePO4 cell model library','https://www.3dcontentcentral.com/download-model.aspx?catalogid=171&id=1350575']]},
+ 'IFR18650 LiFePO4 backup cells':{status:'Generic model',kind:'candidate',detail:'18650/LiFePO4 shape models exist, but the proposal does not select a cell brand. Treat the sleeve and terminal style here as representative.',links:[['18650 / LiFePO4 cell model library','https://www.3dcontentcentral.com/download-model.aspx?catalogid=171&id=1350575']]},
  'RGB status indicator':{status:'Generic model',kind:'candidate',detail:'KiCad publishes a 5 mm four-lead RGB LED STEP model. The proposal does not identify a LED package. Viewer lens, bezel and leads are representative.',links:[['KiCad RGB LED STEP','https://github.com/KiCad/kicad-packages3D/blob/master/LED_THT.3dshapes/LED_D5.0mm-4_RGB.step']]},
  'Low-battery indicator':{status:'Generic model',kind:'candidate',detail:'KiCad publishes generic through-hole LED models; exact red LED package and bezel remain unspecified.',links:[['KiCad 3 mm LED STEP','https://github.com/KiCad/kicad-packages3D/blob/master/LED_THT.3dshapes/LED_D3.0mm.step']]},
  'Low-gain helical antenna':{status:'Candidate model',kind:'candidate',detail:'Taoglas HA.31.A has manufacturer CAD and is a 915 MHz low-gain helical candidate. Its shape and mounting differ from the illustrative coil shown here; it is not a selected antenna.',links:[['Taoglas HA.31.A and 3D model','https://www.taoglas.com/product/ha-31-915mhz-helical-monopole-antenna/']]},
@@ -535,13 +537,12 @@ lead('ESP32-C3 SuperMini',C3['3V3'],'SX1262 LoRa radio',R.VCC,0xc3422c);
 lead('ESP32-C3 SuperMini',C3.GND,'SX1262 LoRa radio',R.GND,0x292d34);
 // BOM does not specify a regulated load rail, power path, or sufficient GPIO allocation.
 // Do not fabricate SYS terminals or reuse occupied GPIOs for buttons and LEDs.
-lead('IFR18650 LiFePO4 backup cell',[1.3,-3.385,1.1],'1S LiFePO4 BMS',[2.55,-4.63,.61],0xc3422c);
-lead('IFR18650 LiFePO4 backup cell',[-5.2,-3.385,1.1],'1S LiFePO4 BMS',[2.55,-4.27,.61],0x292d34,.9);
+// Three cells are shown; pack-to-BMS wiring awaits the selected pack topology.
 lead('1S LiFePO4 BMS',[4.25,-4.63,.61],'TP5000 LiFePO4 charger',[4.5,-1.05,.61],0xc3422c);
 lead('1S LiFePO4 BMS',[4.25,-4.27,.61],'TP5000 LiFePO4 charger',[4.5,-.75,.61],0x292d34);
 lead('5 V wall adapter',[8,-9.15,.5],'5 V cable entry',[4.35,-10,-.5],0x292f34);
-lead('5 V cable entry',[4.60,-5.85,1.1],'TP5000 LiFePO4 charger',[2.4,-.75,.61],0xc3422c);
-lead('5 V cable entry',[4.70,-5.85,1.1],'TP5000 LiFePO4 charger',[2.4,-.45,.61],0x292d34);
+lead('5 V cable entry',[4.60,-8.25,1.1],'TP5000 LiFePO4 charger',[2.4,-.75,.61],0xc3422c);
+lead('5 V cable entry',[4.70,-8.25,1.1],'TP5000 LiFePO4 charger',[2.4,-.45,.61],0x292d34);
 lead('SX1262 LoRa radio',[.26,2.29,.73],'Low-gain helical antenna',[5,.4,1.15],0x393127,-.55);
 
 function updateLeads(force=false){if(!force&&!wireDirty&&Math.abs(sep-lastWireSep)<.0005)return;root.updateMatrixWorld(true);wiring.updateMatrixWorld(true);for(const l of leads){const a=wiring.worldToLocal(attachPoint(l.a,l.ap)),b=wiring.worldToLocal(attachPoint(l.b,l.bp)),v=b.clone().sub(a);const p1=a.clone().addScaledVector(v,.3),p2=a.clone().addScaledVector(v,.7);p1.y-=l.sag;p2.y-=l.sag;p1.z+=.35;p2.z+=.35;const geo=new T.TubeGeometry(new T.CatmullRomCurve3([a,p1,p2,b]),24,.035,8);l.mesh.geometry.dispose();l.mesh.geometry=geo;}wireDirty=false;lastWireSep=sep;}
@@ -553,7 +554,7 @@ function initSetupControls(){const save=document.querySelector('#save-setup'),lo
 /* UI */
 const info=$('#info'),list=$('#list'),tags=$('#tags');let sel=null,helper=null,activeNode='distress',activeParts=parts,activePick=pick;
 function showInfo(p){info.innerHTML='';const h=document.createElement('h2'),c=document.createElement('div'),d=document.createElement('p');c.className='c';
- if(p){h.textContent=p.name;c.textContent=p.cat;d.textContent=p.spec}else if(activeNode==='relay'){h.textContent='Mobile LoRa relay tower';c.textContent='4 m tripod · conceptual geometry';d.textContent='Relay ready · 915–918 MHz · 18 dBm maximum transmit power. Select a component or expose the low-mounted field enclosure with X-ray / exploded views. The 3.2 m mast candidate does not meet the 4 m requirement; the 8 dBi antenna listing conflicts with the 5.8 dBi BOM name.'}else if(activeNode==='console'){h.textContent='Console node';c.textContent=consoleView==='dashboard'?'SIMULATION · Incident operations':'USB LoRa transceiver · conceptual';d.textContent=consoleView==='dashboard'?'Test incident data is generated locally. Send a test alert, acknowledge its receipt and dispatch a simulated response. Switch to Hardware to inspect the transceiver.':'Select hardware, expose the case with X-ray or explode the assembly. Dashboard shows simulated incidents; no live devices are connected.'}else{h.textContent='Distress node';c.textContent='Hardware BOM · 2026-10-03 snapshot';d.textContent='Sheet components are shown with representative geometry. Pack quantity, regulated load supply, GPIO allocation and passive values remain unspecified. Select a part for its BOM details.'}
+ if(p){h.textContent=p.name;c.textContent=p.cat;d.textContent=p.spec}else if(activeNode==='relay'){h.textContent='Mobile LoRa relay tower';c.textContent='4 m tripod · conceptual geometry';d.textContent='Relay ready · 915–918 MHz · 18 dBm maximum transmit power. Select a component or expose the low-mounted field enclosure with X-ray / exploded views. The 3.2 m mast candidate does not meet the 4 m requirement; the 8 dBi antenna listing conflicts with the 5.8 dBi BOM name.'}else if(activeNode==='console'){h.textContent='Console node';c.textContent=consoleView==='dashboard'?'SIMULATION · Incident operations':'USB LoRa transceiver · conceptual';d.textContent=consoleView==='dashboard'?'Test incident data is generated locally. Send a test alert, acknowledge its receipt and dispatch a simulated response. Switch to Hardware to inspect the transceiver.':'Select hardware, expose the case with X-ray or explode the assembly. Dashboard shows simulated incidents; no live devices are connected.'}else{h.textContent='Distress node';c.textContent='Hardware BOM · 2026-10-03 snapshot';d.textContent='Sheet components are shown with representative geometry. Three backup cells are shown. Pack topology, regulated load supply, GPIO allocation and passive values remain unspecified. Select a part for its BOM details.'}
  info.append(h,c,d);if(p){if(activeNode==='distress')editInfo(p)}}
 function select(p){sel=(sel===p)?null:p;if(helper){scene.remove(helper);helper=null}
  if(sel){helper=new T.BoxHelper(sel.obj,0xff7a2f);helper.material.depthTest=false;helper.renderOrder=10;scene.add(helper)}
@@ -591,7 +592,7 @@ $('#relay-focus').addEventListener('click',e=>{const b=e.target.closest('[data-f
 function panHeight(delta){panYT=clamp(focusTargets[relayFraming].y+panYT+delta,-14,20.3)-focusTargets[relayFraming].y;syncHeight()}
 $('#mast-height').oninput=e=>{panYT=Number(e.target.value)*7-14-focusTargets[relayFraming].y;syncHeight()};
 $('#rv').onclick=()=>{$('#ar').checked=false;thT=activeNode==='relay'?.38:.32;phT=activeNode==='console'?1.25:1.35;panYT=0;if(activeNode==='relay')setFocus('box');else rT=nodeRegistry[activeNode].baseR+(activeNode==='console'?25:13)*sepT};
-function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);cam.aspect=w/h;cam.clearViewOffset();if(activeNode==='relay'){const rect=stage.getBoundingClientRect(),top=$('#inspection-nav').getBoundingClientRect().bottom-rect.top+10,bottom=$('#ctl').getBoundingClientRect().top-rect.top-10;relayHeightRatio=clamp((bottom-top)/h,.25,1);const shift=(top+bottom)/2-h/2;cam.setViewOffset(w,h,0,-shift,w,h)}cam.updateProjectionMatrix();if(activeNode==='relay'){panYT=clamp(focusTargets[relayFraming].y+panYT,-14,20.3)-focusTargets[relayFraming].y;syncHeight();const previous=nodeRegistry.relay.baseR,fit=relayFit();rT=clamp(rT*fit/previous,10,240);nodeRegistry.relay.baseR=fit}else if(activeNode==='console'){const previous=nodeRegistry.console.baseR;nodeRegistry.console.baseR=32/Math.min(1,cam.aspect);rT=rT*nodeRegistry.console.baseR/previous}}
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);cam.aspect=w/h;cam.clearViewOffset();if(activeNode==='distress'){const rect=stage.getBoundingClientRect(),top=$('.ttl').getBoundingClientRect().bottom-rect.top+10,bottom=$('#ctl').getBoundingClientRect().top-rect.top-10,ratio=clamp((bottom-top)/h,.25,1),shift=(top+bottom)/2-h/2;cam.setViewOffset(w,h,0,-shift,w,h);const previous=nodeRegistry.distress.baseR;nodeRegistry.distress.baseR=10/Math.sin(Math.atan(Math.tan(cam.fov*Math.PI/360)*Math.min(ratio,cam.aspect)));rT=rT*nodeRegistry.distress.baseR/previous}if(activeNode==='relay'){const rect=stage.getBoundingClientRect(),top=$('#inspection-nav').getBoundingClientRect().bottom-rect.top+10,bottom=$('#ctl').getBoundingClientRect().top-rect.top-10;relayHeightRatio=clamp((bottom-top)/h,.25,1);const shift=(top+bottom)/2-h/2;cam.setViewOffset(w,h,0,-shift,w,h)}cam.updateProjectionMatrix();if(activeNode==='relay'){panYT=clamp(focusTargets[relayFraming].y+panYT,-14,20.3)-focusTargets[relayFraming].y;syncHeight();const previous=nodeRegistry.relay.baseR,fit=relayFit();rT=clamp(rT*fit/previous,10,240);nodeRegistry.relay.baseR=fit}else if(activeNode==='console'){const previous=nodeRegistry.console.baseR;nodeRegistry.console.baseR=32/Math.min(1,cam.aspect);rT=rT*nodeRegistry.console.baseR/previous}}
 new ResizeObserver(resize).observe(stage);resize();
 
 /* Console alert simulation. */
@@ -638,7 +639,7 @@ function loop(now){requestAnimationFrame(loop);const dt=Math.min((now-last)/1000
  const tr=xr>.01;shellMats.forEach(m=>{if(m.transparent!==tr){m.transparent=tr;m.needsUpdate=true}m.opacity=1-.88*xr;m.depthWrite=xr<.5});
  labelMats.forEach(m=>m.opacity=1-.7*xr);edgeMat.opacity=.9*xr;
  grid.position.y=-.5-7*sep-(sep>0?.8:0);
- if(activeNode==='relay'){tg.copy(focusTargets[relayFraming]);tg.y+=panY;if(relayFraming==='box'){tg.x-=.9*sep;tg.z+=1.5*sep}}else if(activeNode==='console')tg.set(0,1,1.5+1.5*sep);else tg.set(0,.5*sep,1.5+3*sep);
+ if(activeNode==='relay'){tg.copy(focusTargets[relayFraming]);tg.y+=panY;if(relayFraming==='box'){tg.x-=.9*sep;tg.z+=1.5*sep}}else if(activeNode==='console')tg.set(0,1,1.5+1.5*sep);else tg.set(0,-1.2+.5*sep,1.5+3*sep);
  cameraTarget.lerp(tg,k);cam.position.set(cameraTarget.x+r*Math.sin(ph)*Math.sin(th),cameraTarget.y+r*Math.cos(ph),cameraTarget.z+r*Math.sin(ph)*Math.cos(th));cam.lookAt(cameraTarget);
  root.updateMatrixWorld(true);relayRoot.updateMatrixWorld(true);consoleRoot.updateMatrixWorld(true);if(activeNode==='distress')updateLeads();if(activeNode==='relay')updateRelayLeads();if(activeNode==='console')updateConsoleLeads();
  const W=stage.clientWidth,H=stage.clientHeight;

@@ -65,7 +65,11 @@ await page.getByRole('tab',{name:'Distress Node',exact:true}).click();await sett
  ['SW-420 vibration sensor','LiFePO4 power-path charger','MCP23017 I/O expander','3.3 V buck-boost regulator','3.3 V power distribution','Clear hinged button cover'].every(n=>!names.includes(n))&&wall.visible&&root.visible&&!relayRoot.visible&&!consoleRoot.visible;
 });
 await check('all components link to sheet authority',()=>[...parts,...relayParts,...consoleParts].every(p=>p.source.links.some(l=>l[1]===componentSheet)));
-await check('battery does not claim pack quantity',()=>byName('IFR18650 LiFePO4 backup cell').spec.includes('does not specify pack quantity')&&batteryYs.length===1);
+await check('three full-size backup cells are displayed',()=>{const p=byName('IFR18650 LiFePO4 backup cells');let cells=0;p.obj.traverse(o=>{if(o.isMesh&&o.geometry.type==='CylinderGeometry'&&o.geometry.parameters.height===6.5)cells++});return cells===3&&p.spec.includes('does not specify pack quantity')});
+const legend=await page.locator('#light-legend').innerHTML();
+await page.waitForTimeout(4500);
+assert.equal(await page.locator('#light-legend').innerHTML(),legend);
+await check('static legend is visible and RGB LED stays unlit',()=>!$('#light-legend').hidden&&$('#light-legend').children.length===5&&rgb.m.emissiveIntensity===0&&rgb.m.color.getHex()===0xc6d2d8);
 await check('all three RTC boards include EEPROM geometry',()=>[nodeRtc,relayRtc.obj,cpRtc.obj].every(g=>{let count=0;g.traverse(o=>{if(o.isMesh&&o.material.map)count++});return count>=6}));
 await page.getByRole('button',{name:'Exploded',exact:true}).click();await settle();
 await check('distress exploded wires remain attached to existing components',()=>leads.every(l=>{
@@ -74,6 +78,10 @@ await check('distress exploded wires remain attached to existing components',()=
 }));
 await snapshot('kalasag-distress-bom-exploded');
 await page.getByRole('button',{name:'X-ray',exact:true}).click();await settle();
+await check('three cells fit between the mobile legend and controls',()=>{
+ cam.updateMatrixWorld();const b=new T.Box3().setFromObject(byName('IFR18650 LiFePO4 backup cells').obj),rect=stage.getBoundingClientRect();
+ for(const x of [b.min.x,b.max.x])for(const y of [b.min.y,b.max.y])for(const z of [b.min.z,b.max.z]){const v=new T.Vector3(x,y,z).project(cam),py=rect.top+(-v.y*.5+.5)*rect.height;if(Math.abs(v.x)>1||py<$('.ttl').getBoundingClientRect().bottom||py>$('#ctl').getBoundingClientRect().top)return false}return true;
+});
 await snapshot('kalasag-distress-bom-xray');
 assert.deepEqual(errors,[]);console.log('PASS no browser JavaScript or console errors');await browser.close();
 })().catch(e=>{console.error(e);process.exitCode=1}).finally(async()=>{if(browser)await browser.close()});

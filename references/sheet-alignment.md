@@ -5,7 +5,7 @@ Branch: `feat/sheet-aligned-components`. Baseline: `10806ec`. Authority: [Hardwa
 | BOM rows | Current representation |
 | --- | --- |
 | 9 | ADXL345 GY-291 replaces SW-420, comparator and trimmer geometry; eight-pin header and shared I²C are represented. |
-| 11, 16 | One representative IFR18650 3.2 V / 1500 mAh cell with holder; quantity/topology unspecified in the sheet, no 1S2P claim. |
+| 11, 16 | Three IFR18650 3.2 V / 1500 mAh cells with individual holders, per the requested model layout. Enclosure extended downward for clearance. Sheet quantity/topology remain unspecified; no aggregate capacity or pack interconnects are assumed. |
 | 12 | TP5000 with inductor and IN/BAT pads, set to 3.6 V; no SYS terminal. |
 | 14 | External 5 V adapter body, prongs and lead. |
 | 15 | Flame-retardant ABS IP65 requirement stated on enclosure; geometry does not establish a tested rating. |
@@ -19,7 +19,7 @@ Other named BOM families remain represented. Removed unlisted additions: MCP2301
 
 ## Wiring dependencies and unresolved circuit design
 
-The former charger SYS output fed the buck-boost, which fed the distribution board. The expander supplied button/LED GPIO and RTC I²C. Those dependencies were inspected before removal. TP5000 is represented with only charger input and battery connections through the BMS; the relay battery now connects directly to LM2596 without the unlisted fuse.
+The former charger SYS output fed the buck-boost, which fed the distribution board. The expander supplied button/LED GPIO and RTC I²C. Those dependencies were inspected before removal. TP5000 is represented with charger input and connections to the BMS; cell interconnects and pack-to-BMS leads are omitted pending pack topology; the relay battery now connects directly to LM2596 without the unlisted fuse.
 
 Survivor RTC and ADXL345 share illustrative GPIO20/21 I²C; radio SPI/control nets remain. Load-power connections are omitted because no replacement regulator or power-path circuit is listed. Button/LED and passive connections are omitted pending a complete GPIO allocation and resistor values. These omissions are stated in the website and README. The BOM does not define a complete electrically validated circuit.
 
