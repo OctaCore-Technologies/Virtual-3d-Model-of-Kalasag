@@ -69,7 +69,11 @@ await check('three full-size backup cells are displayed',()=>{const p=byName('IF
 const legend=await page.locator('#light-legend').innerHTML();
 await page.waitForTimeout(4500);
 assert.equal(await page.locator('#light-legend').innerHTML(),legend);
-await check('static legend is visible and RGB LED stays unlit',()=>!$('#light-legend').hidden&&$('#light-legend').children.length===5&&rgb.m.emissiveIntensity===0&&rgb.m.color.getHex()===0xc6d2d8);
+await check('legend labels remain visible and RGB LED stays unlit',()=>!$('#light-legend').hidden&&$('#light-legend').children.length===5&&rgb.m.emissiveIntensity===0&&rgb.m.color.getHex()===0xc6d2d8);
+await check('only blinking legend states animate',()=>[...document.querySelectorAll('#light-legend i')].every((dot,i)=>getComputedStyle(dot).animationName===(i<2?'legend-blink':'none')));
+await page.emulateMedia({reducedMotion:'reduce'});
+await check('legend respects reduced motion',()=>[...document.querySelectorAll('#light-legend i')].every(dot=>getComputedStyle(dot).animationName==='none'&&getComputedStyle(dot,'::after').animationName==='none'));
+await page.emulateMedia({reducedMotion:'no-preference'});
 await check('all three RTC boards include EEPROM geometry',()=>[nodeRtc,relayRtc.obj,cpRtc.obj].every(g=>{let count=0;g.traverse(o=>{if(o.isMesh&&o.material.map)count++});return count>=6}));
 await page.getByRole('button',{name:'Exploded',exact:true}).click();await settle();
 await check('distress exploded wires remain attached to existing components',()=>leads.every(l=>{

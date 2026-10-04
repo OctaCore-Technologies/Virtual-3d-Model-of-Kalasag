@@ -82,6 +82,11 @@ aside #info,aside .setup-tools{display:none!important}
 #light-legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 14px;font-size:11px}
 #light-legend span,#relay-status{display:flex;align-items:center;gap:7px}
 #light-legend i{display:inline-block;width:8px;height:8px;border-radius:50%;flex-shrink:0}
+#light-legend i.blink{position:relative;animation:legend-blink 1.4s ease-in-out infinite}
+#light-legend i.blink::after{content:"";position:absolute;inset:-2px;border:1px solid currentColor;border-radius:50%;animation:legend-wave 1.4s ease-out infinite}
+@keyframes legend-blink{0%,100%{opacity:1}50%{opacity:.2}}
+@keyframes legend-wave{0%{transform:scale(.7);opacity:.7}80%,100%{transform:scale(1.8);opacity:0}}
+@media(prefers-reduced-motion:reduce){#light-legend i.blink,#light-legend i.blink::after{animation:none}#light-legend i.blink::after{display:none}}
 #light-legend[hidden],#relay-status[hidden]{display:none}
 @media(max-width:760px){#light-legend{grid-template-columns:1fr;gap:3px;font-size:10px}}
 </style>
@@ -97,8 +102,8 @@ aside #info,aside .setup-tools{display:none!important}
   <canvas id="cv"></canvas>
   <div id="tags" class="off"></div>
   <div class="ttl"><b id="node-title">KALASAG Survivor Distress Node</b><div id="node-subtitle">Wall-mounted installation · drag to inspect · scroll to zoom</div><div id="cap"><div id="light-legend" aria-label="Status light legend">
-<span><i style="background:#ff2a2a"></i>Blinking red: waiting for relay</span>
-<span><i style="background:#2a6bff"></i>Blinking blue: relay acknowledged</span>
+<span><i class="blink" style="background:#ff2a2a;color:#ff2a2a"></i>Blinking red: waiting for relay</span>
+<span><i class="blink" style="background:#2a6bff;color:#2a6bff"></i>Blinking blue: relay acknowledged</span>
 <span><i style="background:#2a6bff"></i>Steady blue: console acknowledged</span>
 <span><i style="background:#2aff6a"></i>Green: help is on the way</span>
 <span><i style="background:#b62626"></i>Separate red LED: low battery</span>
@@ -248,7 +253,7 @@ $('#lid').onclick=()=>{lidTarget=lidTarget?0:1.9;if(!lidTarget){guardTarget=0;$(
 $('#guard').onclick=()=>{guardTarget=guardTarget?0:1.85;if(guardTarget){lidTarget=1.9;$('#lid').textContent='Close button cover'}$('#guard').textContent=guardTarget?'Lower TRAPPED guard':'Lift TRAPPED guard'};
 function led(x,y,r,col,emi){const g=new T.Group(),m=mat(col,{emissive:col,emissiveIntensity:emi,roughness:.16});const d=new T.Mesh(new T.SphereGeometry(r,48,24),m);d.scale.z=.7;d.position.set(x,y,3.28);g.add(cylZ(r+.07,.08,metal(),x,y,3.22),d,cylZ(r*.75,.6,blk(),x,y,2.91));for(const a of (r>.2?[-.12,-.04,.04,.12]:[-.07,.07]))g.add(box(.025,.025,.4,metal(),x+a,y,2.4));return{g,m}}
 const rgb=led(-.65,2.6,.27,0xff2a2a,1),low=led(.65,2.6,.15,0x8b1616,.05);
-part('RGB status indicator','Front panel','Proposal status sequence: blinking red while awaiting relay acknowledgment, blinking blue after relay acknowledgment, steady blue after console acknowledgment, green when help is on the way. The static legend describes these states; the model LED is unlit and does not animate.',rgb.g,[-.65,2.6,3.5],cover);
+part('RGB status indicator','Front panel','Proposal status sequence: blinking red while awaiting relay acknowledgment, blinking blue after relay acknowledgment, steady blue after console acknowledgment, green when help is on the way. The legend illustrates blinking states with pulsing markers; the model LED is unlit and does not animate.',rgb.g,[-.65,2.6,3.5],cover);
 part('Low-battery indicator','Front panel','Separate red warning LED for low backup battery. The model shows an unlit lens, not a simulated battery measurement.',low.g,[.65,2.6,3.4],cover);
 
 let g=board(1.85,2.25,0x17242a,-3.7,1.5,.53);
@@ -626,7 +631,7 @@ const ray=new T.Raycaster(),mp=new T.Vector2();
 function pickAt(e){const b=cv.getBoundingClientRect();mp.set((e.clientX-b.left)/b.width*2-1,-((e.clientY-b.top)/b.height)*2+1);ray.setFromCamera(mp,cam);
  const h=ray.intersectObjects(activePick,false).find(i=>!(xr>.5&&i.object.userData.part.shell));if(h)select(h.object.userData.part)}
 
-/* Static legend describes the hardware sequence; the model LED does not cycle. */
+/* Legend markers illustrate blinking states; the model LED does not cycle. */
 rgb.m.color.setHex(0xc6d2d8);rgb.m.emissive.setHex(0);rgb.m.emissiveIntensity=0;
 
 /* loop */
